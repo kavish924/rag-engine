@@ -1,0 +1,148 @@
+========================================================
+KUBECTL CHEATSHEET (k3d / local cluster friendly)
+========================================================
+
+--------------------------------------------------------
+1. CLUSTER / CONTEXT
+--------------------------------------------------------
+kubectl cluster-info                          # Cluster endpoint info
+kubectl config get-contexts                   # List all contexts
+kubectl config current-context                # Show active context
+kubectl config use-context <context-name>     # Switch context
+kubectl config set-context --current --namespace=<ns>   # Set default namespace
+
+# k3d specific
+k3d cluster list
+k3d cluster create mycluster --agents 2
+k3d cluster delete mycluster
+k3d kubeconfig merge mycluster --kubeconfig-switch-context
+
+
+--------------------------------------------------------
+2. NAMESPACES
+--------------------------------------------------------
+kubectl get namespaces
+kubectl create namespace <ns>
+kubectl delete namespace <ns>
+kubectl get all -n <ns>
+
+
+--------------------------------------------------------
+3. PODS
+--------------------------------------------------------
+kubectl get pods                              # List pods (current ns)
+kubectl get pods -A                           # List pods (all namespaces)
+kubectl get pods -o wide                      # More detail (node, IP)
+kubectl describe pod <pod-name>               # Full pod details/events
+kubectl logs <pod-name>                       # View logs
+kubectl logs -f <pod-name>                    # Stream/follow logs
+kubectl logs <pod-name> -c <container-name>   # Logs from specific container
+kubectl exec -it <pod-name> -- /bin/bash      # Shell into pod
+kubectl delete pod <pod-name>                 # Delete pod
+kubectl port-forward pod/<pod-name> 8080:80   # Forward local port to pod
+
+
+--------------------------------------------------------
+4. DEPLOYMENTS
+--------------------------------------------------------
+kubectl get deployments
+kubectl describe deployment <name>
+kubectl create deployment <name> --image=<image>
+kubectl scale deployment <name> --replicas=3
+kubectl rollout status deployment/<name>
+kubectl rollout history deployment/<name>
+kubectl rollout undo deployment/<name>
+kubectl set image deployment/<name> <container>=<new-image>
+kubectl delete deployment <name>
+
+
+--------------------------------------------------------
+5. SERVICES
+--------------------------------------------------------
+kubectl get services
+kubectl describe service <name>
+kubectl expose deployment <name> --port=80 --target-port=8080 --type=ClusterIP
+kubectl expose deployment <name> --port=80 --type=NodePort
+kubectl delete service <name>
+
+
+--------------------------------------------------------
+6. APPLYING / MANAGING MANIFESTS
+--------------------------------------------------------
+kubectl apply -f deployment.yaml              # Create/update from file
+kubectl apply -f ./k8s/                       # Apply all manifests in folder
+kubectl delete -f deployment.yaml             # Delete resources from file
+kubectl diff -f deployment.yaml               # Preview changes before apply
+kubectl get -f deployment.yaml -o yaml        # View live version of resource
+
+
+--------------------------------------------------------
+7. CONFIGMAPS & SECRETS
+--------------------------------------------------------
+kubectl create configmap <name> --from-file=config.yaml
+kubectl create configmap <name> --from-literal=KEY=value
+kubectl get configmaps
+kubectl describe configmap <name>
+
+kubectl create secret generic <name> --from-literal=API_KEY=xxxx
+kubectl get secrets
+kubectl describe secret <name>
+kubectl get secret <name> -o jsonpath='{.data.API_KEY}' | base64 --decode
+
+
+--------------------------------------------------------
+8. HORIZONTAL POD AUTOSCALER (HPA)
+--------------------------------------------------------
+kubectl autoscale deployment <name> --cpu-percent=70 --min=1 --max=5
+kubectl get hpa
+kubectl describe hpa <name>
+
+
+--------------------------------------------------------
+9. RESOURCE USAGE / DEBUGGING
+--------------------------------------------------------
+kubectl top nodes                             # Node resource usage (needs metrics-server)
+kubectl top pods                              # Pod resource usage
+kubectl get events --sort-by='.lastTimestamp' # Recent cluster events
+kubectl describe node <node-name>             # Node details
+kubectl get pods --field-selector=status.phase=Failed
+kubectl get pods --field-selector=status.phase=Running
+
+
+--------------------------------------------------------
+10. YAML / DRY-RUN HELPERS
+--------------------------------------------------------
+kubectl create deployment <name> --image=<image> --dry-run=client -o yaml > deploy.yaml
+kubectl create service clusterip <name> --tcp=80:8080 --dry-run=client -o yaml > svc.yaml
+kubectl explain deployment.spec               # Field-level docs for a resource
+
+
+--------------------------------------------------------
+11. INGRESS (if using nginx/traefik on k3d)
+--------------------------------------------------------
+kubectl get ingress
+kubectl describe ingress <name>
+kubectl apply -f ingress.yaml
+
+
+--------------------------------------------------------
+12. NAMESPACE CLEANUP / TROUBLESHOOTING
+--------------------------------------------------------
+kubectl delete all --all -n <ns>              # Delete all resources in namespace
+kubectl get pods --show-labels                # Check labels for selector debugging
+kubectl label pod <pod-name> key=value        # Add label
+kubectl annotate pod <pod-name> key=value     # Add annotation
+
+
+--------------------------------------------------------
+NOTES (for MLOps / model-serving context)
+--------------------------------------------------------
+- For your credit-risk pipeline deployment on k3d: use `kubectl apply -f`
+  with separate manifests for the FastAPI inference service, MLflow tracking
+  server (if containerized), and any Redis/Postgres backing services.
+- Use `kubectl logs -f <pod>` heavily during first deploys to catch
+  model-loading or dependency errors early.
+- `kubectl top pods` requires metrics-server installed in k3d
+  (not enabled by default) — install via:
+  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+========================================================

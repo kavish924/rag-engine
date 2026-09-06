@@ -1,0 +1,422 @@
+[
+  {
+    "id":"k8s_001",
+    "question":"What is Kubernetes?",
+    "golden_answer":"Kubernetes is an open-source container management solution originally announced by Google in 2014.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_002",
+    "question":"Who announced Kubernetes?",
+    "golden_answer":"Google announced Kubernetes.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_003",
+    "question":"When was Kubernetes announced?",
+    "golden_answer":"Kubernetes was announced in 2014.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_004",
+    "question":"Which organization received Kubernetes from Google?",
+    "golden_answer":"Google donated Kubernetes to the Cloud Native Computing Foundation (CNCF).",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_005",
+    "question":"What is the purpose of Kubernetes?",
+    "golden_answer":"Kubernetes deploys, runs, manages and orchestrates containerized applications across clusters.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_006",
+    "question":"What is a Kubernetes node?",
+    "golden_answer":"A node is a physical server or virtual machine managed by Kubernetes that runs containers.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_007",
+    "question":"What components run on every Kubernetes node?",
+    "golden_answer":"Every node contains a container runtime, kubelet, and kube-proxy.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_008",
+    "question":"What is kubelet responsible for?",
+    "golden_answer":"Kubelet starts, stops and manages containers according to requests from the control plane.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_009",
+    "question":"What is kube-proxy responsible for?",
+    "golden_answer":"Kube-proxy is responsible for networking and load balancing.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_010",
+    "question":"What does the Kubernetes control plane consist of?",
+    "golden_answer":"The control plane includes the API server, scheduler, controller manager and etcd.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"architecture"
+  },
+  {
+    "id":"k8s_011",
+    "question":"What is a Pod?",
+    "golden_answer":"A Pod is the smallest deployable unit in Kubernetes consisting of one or more containers sharing networking and storage.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_012",
+    "question":"Do Pods survive node failures?",
+    "golden_answer":"No. Pods are not durable and are recreated when nodes fail.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_013",
+    "question":"What are labels in Kubernetes?",
+    "golden_answer":"Labels are key-value pairs attached to Kubernetes resources for identification and selection.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_014",
+    "question":"What are selectors used for?",
+    "golden_answer":"Selectors are used to select Kubernetes resources based on their labels.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_015",
+    "question":"What is a Deployment?",
+    "golden_answer":"A Deployment defines the desired state of Pods and ReplicaSets and supports updates and rollbacks.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_016",
+    "question":"What is a ReplicaSet?",
+    "golden_answer":"A ReplicaSet ensures the desired number of Pod replicas are running.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_017",
+    "question":"What is a Kubernetes Service?",
+    "golden_answer":"A Service provides stable networking and access policies for a logical group of Pods.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_018",
+    "question":"Name three Kubernetes service types.",
+    "golden_answer":"ClusterIP, NodePort and LoadBalancer.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_019",
+    "question":"What is a Persistent Volume?",
+    "golden_answer":"A Persistent Volume is cluster storage with a lifecycle independent of Pods.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_020",
+    "question":"What is a Persistent Volume Claim?",
+    "golden_answer":"A Persistent Volume Claim requests storage and binds to a matching Persistent Volume.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_021",
+    "question":"What is a Kubernetes Secret?",
+    "golden_answer":"A Secret securely stores sensitive information such as passwords and API keys.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_022",
+    "question":"What is a ConfigMap?",
+    "golden_answer":"A ConfigMap stores application configuration separately from container images.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_023",
+    "question":"What is a DaemonSet?",
+    "golden_answer":"A DaemonSet ensures a copy of a Pod runs on every selected node.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_024",
+    "question":"What is a Namespace?",
+    "golden_answer":"A Namespace logically partitions Kubernetes cluster resources.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"definition"
+  },
+  {
+    "id":"k8s_025",
+    "question":"Which tool is recommended for learning Kubernetes locally?",
+    "golden_answer":"Minikube is recommended for running a single-node Kubernetes cluster locally.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_026",
+    "question":"Which command line tool is used to manage Kubernetes clusters?",
+    "golden_answer":"kubectl is the Kubernetes command-line interface.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_027",
+    "question":"Which command displays logs for a Pod?",
+    "golden_answer":"The kubectl logs command displays logs for a Pod.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_028",
+    "question":"Which monitoring solution is mentioned in the guide?",
+    "golden_answer":"Heapster is mentioned as a Kubernetes monitoring solution.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"fact"
+  },
+  {
+    "id":"k8s_029",
+    "question":"How can kubectl manage multiple clusters?",
+    "golden_answer":"kubectl manages multiple clusters using contexts defined in the kubeconfig file.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"concept"
+  },
+  {
+    "id":"k8s_030",
+    "question":"Why are Services important in Kubernetes?",
+    "golden_answer":"Services provide stable network endpoints so applications can communicate with Pods even when Pods change.",
+    "source_docs":["kubernetes.pdf"],
+    "type":"concept"
+  },
+  {
+    "id": "docker_001",
+    "question": "What is Docker?",
+    "golden_answer": "Docker is an open platform for developers and system administrators to build, ship, and run distributed applications using lightweight containers.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_002",
+    "question": "What is a Docker container?",
+    "golden_answer": "A Docker container is a temporary writable filesystem layered on top of an immutable Docker image with its own process group and network stack.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_003",
+    "question": "What is a Docker image?",
+    "golden_answer": "A Docker image is an immutable snapshot of a filesystem together with metadata used to create containers.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_004",
+    "question": "What command creates and starts a Docker container?",
+    "golden_answer": "The docker run command creates and starts a container.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_005",
+    "question": "What is the difference between docker create and docker run?",
+    "golden_answer": "docker create only creates a container, while docker run creates and immediately starts the container.",
+    "source_docs": ["docker.pdf"],
+    "type": "comparison"
+  },
+  {
+    "id": "docker_006",
+    "question": "Which command gracefully stops a running container?",
+    "golden_answer": "The docker stop command gracefully stops a running container by sending SIGTERM followed by SIGKILL after a timeout.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_007",
+    "question": "Which command forcefully terminates a running container?",
+    "golden_answer": "The docker kill command forcefully terminates a running container using SIGKILL.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_008",
+    "question": "What command removes a Docker container?",
+    "golden_answer": "The docker rm command removes a Docker container.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_009",
+    "question": "How do you list running Docker containers?",
+    "golden_answer": "Use the docker ps command to list running containers.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_010",
+    "question": "How do you list all Docker containers including stopped ones?",
+    "golden_answer": "Use docker ps -a to list all containers.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_011",
+    "question": "Which command displays logs generated by a container?",
+    "golden_answer": "The docker logs command displays a container's stdout and stderr output.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_012",
+    "question": "Which command executes a new command inside an existing container?",
+    "golden_answer": "The docker exec command runs a command inside an existing container.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_013",
+    "question": "What does the --rm option do in docker run?",
+    "golden_answer": "The --rm option automatically removes the container after it exits.",
+    "source_docs": ["docker.pdf"],
+    "type": "concept"
+  },
+  {
+    "id": "docker_014",
+    "question": "What does the -d option do in docker run?",
+    "golden_answer": "The -d option starts the container in detached mode.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_015",
+    "question": "What is the purpose of the -it options in docker run?",
+    "golden_answer": "The -i option keeps standard input open and the -t option allocates a pseudo-terminal for interactive containers.",
+    "source_docs": ["docker.pdf"],
+    "type": "concept"
+  },
+  {
+    "id": "docker_016",
+    "question": "What is a bind mount in Docker?",
+    "golden_answer": "A bind mount maps a directory from the host filesystem into a container.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_017",
+    "question": "What is a named volume?",
+    "golden_answer": "A named volume is Docker-managed persistent storage stored under Docker's volume directory.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_018",
+    "question": "Why are Docker volumes used?",
+    "golden_answer": "Docker volumes are used to persist data independently of the container lifecycle.",
+    "source_docs": ["docker.pdf"],
+    "type": "concept"
+  },
+  {
+    "id": "docker_019",
+    "question": "How can a host port be exposed to a container?",
+    "golden_answer": "Use the -p option in docker run to publish a host port to a container port.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_020",
+    "question": "What is Dockerfile?",
+    "golden_answer": "A Dockerfile is a text file containing instructions for automatically building Docker images.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_021",
+    "question": "Which instruction specifies the base image in a Dockerfile?",
+    "golden_answer": "The FROM instruction specifies the base image.",
+    "source_docs": ["docker.pdf"],
+    "type": "command"
+  },
+  {
+    "id": "docker_022",
+    "question": "What does the RUN instruction do in a Dockerfile?",
+    "golden_answer": "The RUN instruction executes commands while building the image.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_023",
+    "question": "What is the purpose of the COPY instruction?",
+    "golden_answer": "The COPY instruction copies files from the build context into the image.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_024",
+    "question": "What is the purpose of the CMD instruction?",
+    "golden_answer": "The CMD instruction specifies the default command executed when a container starts.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_025",
+    "question": "What does the EXPOSE instruction declare?",
+    "golden_answer": "The EXPOSE instruction documents the network ports used by the container.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_026",
+    "question": "What is Docker build cache?",
+    "golden_answer": "Docker build cache reuses previously built image layers when the build instructions and inputs have not changed.",
+    "source_docs": ["docker.pdf"],
+    "type": "concept"
+  },
+  {
+    "id": "docker_027",
+    "question": "What is a multi-stage Docker build?",
+    "golden_answer": "A multi-stage build uses multiple FROM statements to separate build and runtime environments, producing smaller final images.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_028",
+    "question": "What is Docker Compose used for?",
+    "golden_answer": "Docker Compose is used to configure and deploy multiple containers as a single application.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_029",
+    "question": "What is Docker Swarm?",
+    "golden_answer": "Docker Swarm is Docker's clustering solution for managing multiple Docker hosts and deploying services.",
+    "source_docs": ["docker.pdf"],
+    "type": "definition"
+  },
+  {
+    "id": "docker_030",
+    "question": "Why should Docker containers avoid running with the --privileged option?",
+    "golden_answer": "Using --privileged grants extensive host privileges and increases security risks, so it should generally be avoided.",
+    "source_docs": ["docker.pdf"],
+    "type": "security"
+  }
+]

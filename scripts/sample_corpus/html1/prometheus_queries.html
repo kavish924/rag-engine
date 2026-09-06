@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prometheus Queries Reference (PromQL)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #2a2e38;
+    --text: #e4e6eb;
+    --muted: #9aa0ac;
+    --accent: #4fb0ff;
+    --code-bg: #1d2129;
+    --green: #6fd08c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 1.9rem;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--muted); margin-bottom: 40px; font-size: 0.95rem; }
+  h2 {
+    font-size: 1.25rem;
+    color: var(--accent);
+    margin-top: 44px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before {
+    content: "";
+    width: 6px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+  }
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .card p.desc {
+    color: var(--muted);
+    margin: 0 0 12px;
+    font-size: 0.92rem;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    margin: 0;
+    font-size: 0.88rem;
+  }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    color: var(--green);
+  }
+  .tag {
+    display: inline-block;
+    background: rgba(79,176,255,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(79,176,255,0.35);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    margin-bottom: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--accent); font-weight: 600; }
+  .note {
+    background: rgba(111,208,140,0.08);
+    border-left: 3px solid var(--green);
+    padding: 12px 16px;
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+  <h1>Prometheus Queries Reference (PromQL)</h1>
+  <p class="subtitle">Query patterns for monitoring a RAG engine's API, retriever, and inference services — paired with Grafana dashboards.</p>
+
+  <h2>Core PromQL Concepts</h2>
+  <div class="card">
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td><code>counter</code></td><td>Monotonically increasing value (e.g. total requests). Use <code>rate()</code>/<code>increase()</code>, never raw.</td></tr>
+      <tr><td><code>gauge</code></td><td>Value that goes up or down (e.g. memory usage, queue length).</td></tr>
+      <tr><td><code>histogram</code></td><td>Buckets observations (e.g. request latency) — enables percentile queries.</td></tr>
+      <tr><td><code>rate()</code></td><td>Per-second average rate of increase of a counter over a time window.</td></tr>
+      <tr><td><code>irate()</code></td><td>Instant rate using only the last two data points — more reactive, noisier.</td></tr>
+    </table>
+  </div>
+
+  <h2>Request Rate & Traffic</h2>
+  <div class="card">
+    <span class="tag">counter</span>
+    <h3>Requests per second (RAG API gateway)</h3>
+    <pre><code>rate(http_requests_total{job="rag-api"}[5m])</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">counter</span>
+    <h3>Requests per second, broken down by endpoint</h3>
+    <pre><code>sum by (path) (rate(http_requests_total{job="rag-api"}[5m]))</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">counter</span>
+    <h3>Error rate (5xx responses) as a percentage of total traffic</h3>
+    <pre><code>sum(rate(http_requests_total{job="rag-api", status=~"5.."}[5m]))
+/
+sum(rate(http_requests_total{job="rag-api"}[5m]))
+* 100</code></pre>
+  </div>
+
+  <h2>Latency</h2>
+  <div class="card">
+    <span class="tag">histogram</span>
+    <h3>p95 latency for the retriever service</h3>
+    <pre><code>histogram_quantile(0.95,
+  sum by (le) (rate(retriever_request_duration_seconds_bucket[5m]))
+)</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">histogram</span>
+    <h3>p50 / p99 latency comparison for LLM inference calls</h3>
+    <pre><code>histogram_quantile(0.50, sum by (le) (rate(llm_inference_duration_seconds_bucket[5m])))
+histogram_quantile(0.99, sum by (le) (rate(llm_inference_duration_seconds_bucket[5m])))</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">gauge</span>
+    <h3>Average request duration over 5 minutes</h3>
+    <pre><code>rate(http_request_duration_seconds_sum{job="rag-api"}[5m])
+/
+rate(http_request_duration_seconds_count{job="rag-api"}[5m])</code></pre>
+  </div>
+
+  <h2>Resource Usage</h2>
+  <div class="card">
+    <span class="tag">gauge</span>
+    <h3>CPU usage per Pod (with cAdvisor/kube-state-metrics)</h3>
+    <pre><code>sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="rag-system"}[5m]))</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">gauge</span>
+    <h3>Memory usage per Pod</h3>
+    <pre><code>sum by (pod) (container_memory_working_set_bytes{namespace="rag-system"})</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">gauge</span>
+    <h3>GPU utilization (via DCGM exporter, for LLM/embedding inference)</h3>
+    <pre><code>avg by (gpu) (DCGM_FI_DEV_GPU_UTIL)</code></pre>
+  </div>
+
+  <h2>RAG-Specific Application Metrics</h2>
+  <div class="card">
+    <p class="desc">These assume you've instrumented custom metrics in your FastAPI app (via <code>prometheus_client</code>) for retrieval quality and hallucination tracking.</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">counter</span>
+    <h3>Retrieval hit rate (fraction of queries with at least one relevant doc)</h3>
+    <pre><code>sum(rate(rag_retrieval_hits_total[15m]))
+/
+sum(rate(rag_retrieval_queries_total[15m]))</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">counter</span>
+    <h3>Hallucination flag rate (from an eval/guardrail check)</h3>
+    <pre><code>sum(rate(rag_hallucination_flagged_total[1h]))
+/
+sum(rate(rag_responses_total[1h]))
+* 100</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">gauge</span>
+    <h3>Vector DB query queue depth</h3>
+    <pre><code>vector_db_query_queue_depth{job="vector-db"}</code></pre>
+  </div>
+
+  <h2>Alerting Rule Examples</h2>
+  <div class="card">
+    <span class="tag">alert</span>
+    <h3>High error rate</h3>
+    <pre><code>- alert: RagApiHighErrorRate
+  expr: |
+    sum(rate(http_requests_total{job="rag-api", status=~"5.."}[5m]))
+    /
+    sum(rate(http_requests_total{job="rag-api"}[5m])) > 0.05
+  for: 5m
+  labels:
+    severity: critical
+  annotations:
+    summary: "RAG API error rate above 5%"</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">alert</span>
+    <h3>Latency SLO breach</h3>
+    <pre><code>- alert: RetrieverLatencyHigh
+  expr: |
+    histogram_quantile(0.95,
+      sum by (le) (rate(retriever_request_duration_seconds_bucket[5m]))
+    ) > 1.5
+  for: 10m
+  labels:
+    severity: warning
+  annotations:
+    summary: "Retriever p95 latency above 1.5s for 10 minutes"</code></pre>
+  </div>
+
+  <h2>Useful PromQL Functions Cheat List</h2>
+  <div class="card">
+    <table>
+      <tr><th>Function</th><th>Purpose</th></tr>
+      <tr><td><code>rate(v[t])</code></td><td>Per-second average rate over range t (for counters)</td></tr>
+      <tr><td><code>increase(v[t])</code></td><td>Total increase over range t</td></tr>
+      <tr><td><code>histogram_quantile(q, v)</code></td><td>Compute percentile from histogram buckets</td></tr>
+      <tr><td><code>sum by (label) (v)</code></td><td>Aggregate, grouped by a label</td></tr>
+      <tr><td><code>topk(n, v)</code></td><td>Top n series by value</td></tr>
+      <tr><td><code>avg_over_time(v[t])</code></td><td>Average value over range t</td></tr>
+      <tr><td><code>predict_linear(v[t], s)</code></td><td>Linear-regression forecast s seconds ahead</td></tr>
+      <tr><td><code>absent(v)</code></td><td>Returns 1 if series is missing — useful for "service down" alerts</td></tr>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>Corpus note:</strong> pairs with the Kubernetes Services and Docker Networking
+    references — Prometheus typically scrapes metrics endpoints exposed as ClusterIP Services
+    inside the same cluster as the RAG engine's retriever, vector DB, and LLM inference Pods.
+  </div>
+
+</body>
+</html>

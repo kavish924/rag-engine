@@ -1,0 +1,165 @@
+========================================================
+LINUX COMMANDS CHEATSHEET (MLOps / Dev workflow focus)
+========================================================
+
+--------------------------------------------------------
+1. FILE & DIRECTORY BASICS
+--------------------------------------------------------
+pwd                          # Print current directory
+ls -la                       # List all files (incl. hidden) with details
+cd <path>                    # Change directory
+cd ..                        # Go up one level
+mkdir <dir>                  # Create directory
+mkdir -p a/b/c                # Create nested directories
+rm <file>                    # Delete file
+rm -r <dir>                  # Delete directory recursively
+rm -rf <dir>                 # Force delete (careful!)
+cp <src> <dest>               # Copy file
+cp -r <src_dir> <dest_dir>    # Copy directory recursively
+mv <src> <dest>               # Move/rename file
+touch <file>                 # Create empty file
+find . -name "*.py"           # Find files by pattern
+find . -type d -name "logs"    # Find directories by name
+
+
+--------------------------------------------------------
+2. VIEWING / EDITING FILES
+--------------------------------------------------------
+cat file.txt                 # Print file contents
+less file.txt                 # Scrollable file viewer (q to quit)
+head -n 20 file.txt            # First 20 lines
+tail -n 20 file.txt            # Last 20 lines
+tail -f logfile.log            # Live-follow a log file
+nano file.txt                 # Simple terminal editor
+vim file.txt                  # Vim editor
+wc -l file.txt                 # Count lines in file
+
+
+--------------------------------------------------------
+3. SEARCHING / TEXT PROCESSING
+--------------------------------------------------------
+grep "pattern" file.txt              # Search text in file
+grep -r "pattern" ./src/             # Recursive search in directory
+grep -i "error" logfile.log           # Case-insensitive search
+grep -n "TODO" *.py                   # Show line numbers
+cat file.txt | grep "AUC"             # Pipe example
+sed 's/old/new/g' file.txt            # Replace text (stream editor)
+awk '{print $1}' file.txt             # Print first column
+sort file.txt                         # Sort lines
+sort -nr file.txt                     # Sort numerically, descending
+uniq file.txt                         # Remove duplicate adjacent lines
+cut -d, -f1 data.csv                   # Extract first CSV column
+
+
+--------------------------------------------------------
+4. PERMISSIONS & OWNERSHIP
+--------------------------------------------------------
+chmod +x script.sh            # Make script executable
+chmod 755 file                # Set specific permission bits
+chown user:group file         # Change file ownership
+ls -l                         # View permission details
+
+
+--------------------------------------------------------
+5. PROCESS MANAGEMENT
+--------------------------------------------------------
+ps aux                        # List all running processes
+ps aux | grep python           # Find specific process
+top                           # Live process/resource monitor
+htop                          # Improved live monitor (if installed)
+kill <PID>                    # Terminate process by ID
+kill -9 <PID>                  # Force kill
+jobs                          # List background jobs
+bg / fg                       # Send job to background/foreground
+nohup python train.py &        # Run process immune to hangup, in background
+disown                        # Detach job from shell
+
+
+--------------------------------------------------------
+6. DISK & SYSTEM INFO
+--------------------------------------------------------
+df -h                         # Disk space usage (human-readable)
+du -sh <dir>                  # Size of a directory
+free -h                       # RAM usage
+uname -a                      # System/kernel info
+nproc                         # Number of CPU cores
+lscpu                         # CPU details
+nvidia-smi                    # GPU usage/status (for CUDA training jobs)
+
+
+--------------------------------------------------------
+7. NETWORKING
+--------------------------------------------------------
+curl https://api.example.com          # Make HTTP request
+curl -X POST -d '{"key":"val"}' <url>  # POST request
+wget <url>                            # Download file
+ping <host>                           # Test connectivity
+netstat -tulnp                        # List open ports/connections
+ss -tulnp                             # Modern alternative to netstat
+lsof -i :8000                         # Find process using a port
+
+
+--------------------------------------------------------
+8. ARCHIVES / COMPRESSION
+--------------------------------------------------------
+tar -czvf archive.tar.gz <dir>        # Create compressed archive
+tar -xzvf archive.tar.gz              # Extract compressed archive
+zip -r archive.zip <dir>              # Create zip
+unzip archive.zip                     # Extract zip
+
+
+--------------------------------------------------------
+9. ENVIRONMENT / PYTHON WORKFLOW
+--------------------------------------------------------
+python3 -m venv venv                  # Create virtual environment
+source venv/bin/activate              # Activate venv (Linux/Mac)
+deactivate                            # Deactivate venv
+pip install -r requirements.txt        # Install dependencies
+pip freeze > requirements.txt          # Export installed packages
+export VAR_NAME=value                  # Set environment variable (session)
+echo $VAR_NAME                         # Print environment variable
+which python3                          # Path to python executable
+
+
+--------------------------------------------------------
+10. GIT BASICS (frequently paired with above)
+--------------------------------------------------------
+git status
+git add .
+git commit -m "message"
+git push origin main
+git pull
+git log --oneline -10
+git branch -a
+git checkout -b feature/new-branch
+git diff
+
+
+--------------------------------------------------------
+11. DOCKER QUICK REFERENCE (since often used alongside)
+--------------------------------------------------------
+docker ps                             # Running containers
+docker ps -a                          # All containers
+docker images                         # List images
+docker build -t myimage .              # Build image
+docker run -it myimage bash            # Run interactive container
+docker logs <container>                # View logs
+docker exec -it <container> bash       # Shell into running container
+docker stop <container>                # Stop container
+docker rm <container>                  # Remove container
+docker rmi <image>                     # Remove image
+
+
+--------------------------------------------------------
+NOTES (for your Windows/PowerShell + VS Code setup)
+--------------------------------------------------------
+- If working via WSL2 (recommended for Linux-native tooling on Windows),
+  these commands work natively inside the WSL terminal.
+- In plain PowerShell, many of these have different syntax
+  (e.g. `Get-ChildItem` instead of `ls`, `Remove-Item` instead of `rm`) —
+  but WSL2 + VS Code's integrated terminal lets you use this cheatsheet directly.
+- `nvidia-smi` is especially useful for monitoring GPU load during your
+  Optuna/XGBoost/LightGBM/CatBoost tuning runs.
+- `nohup ... &` + `tail -f` is a common pattern for kicking off long training
+  jobs and monitoring them without keeping a terminal tab blocked.
+========================================================

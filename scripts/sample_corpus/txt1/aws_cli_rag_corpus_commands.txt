@@ -1,0 +1,122 @@
+
+--------------------------------------------------------
+1. CONFIGURE AWS CLI (one-time setup)
+--------------------------------------------------------
+aws configure
+# Enter: AWS Access Key ID, Secret Access Key, Region (e.g. ap-south-1), Output format (json)
+
+# Verify identity
+aws sts get-caller-identity
+
+
+--------------------------------------------------------
+2. CREATE S3 BUCKET TO STORE YOUR CORPUS
+--------------------------------------------------------
+aws s3 mb s3://my-rag-corpus-bucket --region ap-south-1
+
+# Enable versioning (recommended, so you can track corpus updates)
+aws s3api put-bucket-versioning \
+  --bucket my-rag-corpus-bucket \
+  --versioning-configuration Status=Enabled
+
+
+--------------------------------------------------------
+3. UPLOAD .TXT CORPUS FILES
+--------------------------------------------------------
+# Upload a single file
+aws s3 cp ./corpus/doc1.txt s3://my-rag-corpus-bucket/corpus/
+
+# Upload an entire local folder of .txt files (recursive sync)
+aws s3 sync ./corpus/ s3://my-rag-corpus-bucket/corpus/ --exclude "*" --include "*.txt"
+
+# Sync while deleting files from S3 that no longer exist locally (keep in sync)
+aws s3 sync ./corpus/ s3://my-rag-corpus-bucket/corpus/ --exclude "*" --include "*.txt" --delete
+
+
+--------------------------------------------------------
+4. LIST / VERIFY UPLOADED CORPUS
+--------------------------------------------------------
+# List all files in the corpus prefix
+aws s3 ls s3://my-rag-corpus-bucket/corpus/ --recursive --human-readable --summarize
+
+# Count number of .txt files uploaded
+aws s3 ls s3://my-rag-corpus-bucket/corpus/ --recursive | grep ".txt" | wc -l
+
+
+--------------------------------------------------------
+5. DOWNLOAD CORPUS (e.g., onto a training/inference machine)
+--------------------------------------------------------
+aws s3 sync s3://my-rag-corpus-bucket/corpus/ ./local_corpus/
+
+
+--------------------------------------------------------
+6. SET LIFECYCLE RULE (optional - move old corpus versions to cheaper storage)
+--------------------------------------------------------
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket my-rag-corpus-bucket \
+  --lifecycle-configuration file://lifecycle.json
+
+# lifecycle.json example:
+# {
+#   "Rules": [
+#     {
+#       "ID": "MoveOldVersionsToGlacier",
+#       "Status": "Enabled",
+#       "Filter": {"Prefix": "corpus/"},
+#       "NoncurrentVersionTransitions": [
+#         {"NoncurrentDays": 30, "StorageClass": "GLACIER"}
+#       ]
+#     }
+#   ]
+# }
+
+
+--------------------------------------------------------
+7. (OPTIONAL) BEDROCK KNOWLEDGE BASE - INGEST CORPUS FOR MANAGED RAG
+--------------------------------------------------------
+# If using AWS Bedrock's managed RAG (Knowledge Bases) instead of self-hosted
+# Chroma/BM25, point it at your S3 corpus and trigger ingestion.
+
+# Create a data source pointing to your S3 bucket (requires existing KB ID)
+aws bedrock-agent create-data-source \
+  --knowledge-base-id <KNOWLEDGE_BASE_ID> \
+  --name "txt-corpus-source" \
+  --data-source-configuration '{
+      "type": "S3",
+      "s3Configuration": {
+        "bucketArn": "arn:aws:s3:::my-rag-corpus-bucket",
+        "inclusionPrefixes": ["corpus/"]
+      }
+    }'
+
+# Start ingestion job (chunk + embed the .txt files)
+aws bedrock-agent start-ingestion-job \
+  --knowledge-base-id <KNOWLEDGE_BASE_ID> \
+  --data-source-id <DATA_SOURCE_ID>
+
+# Check ingestion job status
+aws bedrock-agent get-ingestion-job \
+  --knowledge-base-id <KNOWLEDGE_BASE_ID> \
+  --data-source-id <DATA_SOURCE_ID> \
+  --ingestion-job-id <JOB_ID>
+
+
+--------------------------------------------------------
+8. IAM PERMISSIONS CHECK (if you hit AccessDenied errors)
+--------------------------------------------------------
+aws iam list-attached-user-policies --user-name <your-iam-username>
+
+# Minimal S3 policy needed: s3:PutObject, s3:GetObject, s3:ListBucket, s3:DeleteObject
+
+
+--------------------------------------------------------
+NOTES
+--------------------------------------------------------
+- Replace bucket name "my-rag-corpus-bucket" with a globally unique name.
+- Replace region "ap-south-1" (Mumbai) with your preferred AWS region.
+- For local-first RAG stacks (Chroma + BM25, as in your Enterprise RAG Assistant
+  project), S3 is typically just the durable storage/backup layer for raw .txt
+  documents before you chunk and embed them locally.
+- Bedrock Knowledge Base commands are only relevant if you want a fully managed
+  AWS-native RAG pipeline instead of self-hosted vector DB + retrieval.
+========================================================

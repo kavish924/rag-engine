@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kubernetes Services Reference</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #2a2e38;
+    --text: #e4e6eb;
+    --muted: #9aa0ac;
+    --accent: #4fb0ff;
+    --code-bg: #1d2129;
+    --green: #6fd08c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 1.9rem;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--muted); margin-bottom: 40px; font-size: 0.95rem; }
+  h2 {
+    font-size: 1.25rem;
+    color: var(--accent);
+    margin-top: 44px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before {
+    content: "";
+    width: 6px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+  }
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .card p.desc {
+    color: var(--muted);
+    margin: 0 0 12px;
+    font-size: 0.92rem;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    margin: 0;
+    font-size: 0.88rem;
+  }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    color: var(--green);
+  }
+  .tag {
+    display: inline-block;
+    background: rgba(79,176,255,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(79,176,255,0.35);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    margin-bottom: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--accent); font-weight: 600; }
+  .note {
+    background: rgba(111,208,140,0.08);
+    border-left: 3px solid var(--green);
+    padding: 12px 16px;
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+  <h1>Kubernetes Services Reference</h1>
+  <p class="subtitle">Core concepts and manifests for exposing a RAG engine's components (retriever API, vector DB, LLM inference server) inside and outside a cluster.</p>
+
+  <h2>What a Service Does</h2>
+  <div class="card">
+    <p class="desc">
+      A Kubernetes Service provides a stable network identity (a fixed DNS name and virtual IP)
+      for a set of Pods, even as individual Pods are created, destroyed, or rescheduled.
+      Pods are ephemeral and get new IPs on every restart; a Service abstracts that away so
+      other components — such as a RAG application's retriever, embedding server, or LLM
+      inference container — can reliably reach each other by name instead of tracking Pod IPs.
+    </p>
+  </div>
+
+  <h2>Service Types</h2>
+  <div class="card">
+    <table>
+      <tr><th>Type</th><th>Behavior</th><th>Typical Use in a RAG Stack</th></tr>
+      <tr><td><code>ClusterIP</code></td><td>Default. Internal-only virtual IP, reachable only inside the cluster.</td><td>Vector DB (Chroma/Milvus), internal embedding service, MLflow tracking server</td></tr>
+      <tr><td><code>NodePort</code></td><td>Exposes the service on a static port on every node's IP.</td><td>Quick local/dev access to the retriever API without an ingress controller</td></tr>
+      <tr><td><code>LoadBalancer</code></td><td>Provisions an external cloud load balancer (on supported cloud providers).</td><td>Public-facing RAG API endpoint in production on AWS/GCP/Azure</td></tr>
+      <tr><td><code>ExternalName</code></td><td>Maps a Service to an external DNS name, no proxying.</td><td>Referencing an external hosted LLM API or managed vector DB from inside the cluster</td></tr>
+      <tr><td><code>Headless</code> (<code>clusterIP: None</code>)</td><td>No virtual IP; DNS returns Pod IPs directly.</td><td>StatefulSets like a sharded/clustered vector database</td></tr>
+    </table>
+  </div>
+
+  <h2>Example: ClusterIP Service for a Retriever API</h2>
+  <div class="card">
+    <span class="tag">manifest</span>
+    <h3>retriever-service.yaml</h3>
+    <p class="desc">Exposes a FastAPI-based retriever/embedding service internally to other Pods (e.g. an orchestration/agent layer built with LangGraph).</p>
+    <pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: retriever-service
+spec:
+  selector:
+    app: retriever
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP</code></pre>
+  </div>
+
+  <h2>Example: LoadBalancer Service for a Public RAG API</h2>
+  <div class="card">
+    <span class="tag">manifest</span>
+    <h3>rag-api-service.yaml</h3>
+    <pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: rag-api
+spec:
+  selector:
+    app: rag-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer</code></pre>
+  </div>
+
+  <h2>Example: Headless Service for a Vector DB StatefulSet</h2>
+  <div class="card">
+    <span class="tag">manifest</span>
+    <h3>vector-db-headless.yaml</h3>
+    <p class="desc">Used when each vector DB replica/shard needs a stable, individually addressable DNS entry rather than load-balanced routing.</p>
+    <pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: vector-db
+spec:
+  clusterIP: None
+  selector:
+    app: vector-db
+  ports:
+    - port: 8080
+      targetPort: 8080</code></pre>
+  </div>
+
+  <h2>Service Discovery (DNS)</h2>
+  <div class="card">
+    <p class="desc">
+      Kubernetes assigns every Service a DNS name in the form
+      <code>&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local</code>.
+      Within the same namespace, the short name alone is sufficient.
+    </p>
+    <pre><code># From inside the "rag-orchestrator" Pod, reaching the retriever service:
+http://retriever-service:8000/search
+
+# Cross-namespace reference:
+http://retriever-service.rag-system.svc.cluster.local:8000/search</code></pre>
+  </div>
+
+  <h2>Connecting Services: A RAG Engine Example</h2>
+  <div class="card">
+    <p class="desc">
+      A typical RAG deployment might have these Services wired together:
+    </p>
+    <table>
+      <tr><th>Component</th><th>Service Type</th><th>Reached By</th></tr>
+      <tr><td>rag-api (FastAPI gateway)</td><td>LoadBalancer</td><td>External clients / frontend</td></tr>
+      <tr><td>retriever-service</td><td>ClusterIP</td><td>rag-api Pods</td></tr>
+      <tr><td>vector-db</td><td>Headless / ClusterIP</td><td>retriever-service Pods</td></tr>
+      <tr><td>llm-inference (Ollama/Llama 3)</td><td>ClusterIP</td><td>rag-api or orchestrator Pods</td></tr>
+      <tr><td>mlflow-tracking</td><td>ClusterIP (or NodePort for local dashboard access)</td><td>Training/eval jobs, developer browser via port-forward</td></tr>
+    </table>
+  </div>
+
+  <h2>Common kubectl Commands for Services</h2>
+  <div class="card">
+    <pre><code>kubectl get services
+kubectl describe service retriever-service
+kubectl get endpoints retriever-service      # Confirm it has matching Pod IPs
+kubectl port-forward svc/retriever-service 8000:8000   # Local access for testing</code></pre>
+  </div>
+
+  <h2>Troubleshooting Checklist</h2>
+  <div class="card">
+    <table>
+      <tr><td>1.</td><td>Does <code>kubectl get endpoints &lt;service&gt;</code> return any Pod IPs? If empty, the selector doesn't match Pod labels.</td></tr>
+      <tr><td>2.</td><td>Do the Pod labels exactly match <code>spec.selector</code> in the Service manifest?</td></tr>
+      <tr><td>3.</td><td>Is the app inside the Pod binding to <code>0.0.0.0</code>, not <code>127.0.0.1</code>?</td></tr>
+      <tr><td>4.</td><td>Does <code>targetPort</code> match the actual container port?</td></tr>
+      <tr><td>5.</td><td>For LoadBalancer type: is the cloud provider's controller provisioning an external IP? Check <code>kubectl get svc -w</code>.</td></tr>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>Corpus note:</strong> this document is intended as reference/context material
+    for a RAG engine's knowledge base — e.g. to answer questions about how the RAG system's
+    own infrastructure (retriever, vector DB, LLM server) is exposed and networked when
+    deployed on Kubernetes/k3d.
+  </div>
+
+</body>
+</html>

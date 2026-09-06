@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Documentation</title>
+</head>
+
+<body>
+
+<nav>
+    <h2>Navigation</h2>
+    <ul>
+        <li>Introduction</li>
+        <li>Installation</li>
+        <li>Routing</li>
+        <li>Dependency Injection</li>
+        <li>Best Practices</li>
+    </ul>
+</nav>
+
+<h1>FastAPI Documentation</h1>
+
+<p>
+FastAPI is a modern Python web framework for building APIs.
+It is built on Starlette for the web framework and Pydantic
+for data validation. FastAPI automatically generates OpenAPI
+documentation and provides excellent performance comparable
+to Node.js and Go frameworks.
+</p>
+
+<h2>Key Features</h2>
+
+<ul>
+    <li>High Performance</li>
+    <li>Automatic OpenAPI Documentation</li>
+    <li>Pydantic Data Validation</li>
+    <li>Dependency Injection</li>
+    <li>Asynchronous Programming Support</li>
+    <li>Type Hint Based Development</li>
+</ul>
+
+<h2>Installation</h2>
+
+<p>
+FastAPI can be installed using pip.
+</p>
+
+<pre>
+pip install fastapi
+pip install "uvicorn[standard]"
+</pre>
+
+<p>
+The application can then be started using:
+</p>
+
+<pre>
+uvicorn app.main:app --reload
+</pre>
+
+<h2>Creating Your First API</h2>
+
+<p>
+Every FastAPI application starts by creating an instance
+of the FastAPI class.
+</p>
+
+<pre>
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"message": "Hello World"}
+</pre>
+
+<h2>Routing</h2>
+
+<p>
+Routes define how incoming HTTP requests are handled.
+Each route consists of an HTTP method, a path, and a
+Python function.
+</p>
+
+<table border="1">
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>GET</td>
+<td>Retrieve resources</td>
+</tr>
+
+<tr>
+<td>POST</td>
+<td>Create resources</td>
+</tr>
+
+<tr>
+<td>PUT</td>
+<td>Update resources</td>
+</tr>
+
+<tr>
+<td>DELETE</td>
+<td>Delete resources</td>
+</tr>
+
+</table>
+
+<h3>GET Example</h3>
+
+<pre>
+@app.get("/users")
+def get_users():
+    return users
+</pre>
+
+<h3>POST Example</h3>
+
+<pre>
+@app.post("/users")
+def create_user(user: User):
+    return user
+</pre>
+
+<h2>Path Parameters</h2>
+
+<p>
+Path parameters allow APIs to identify specific resources.
+FastAPI automatically validates their type.
+</p>
+
+<pre>
+@app.get("/users/{user_id}")
+def get_user(user_id: int):
+    return {"id": user_id}
+</pre>
+
+<h2>Query Parameters</h2>
+
+<p>
+Query parameters are optional values sent after the URL.
+They are commonly used for pagination and filtering.
+</p>
+
+<pre>
+@app.get("/search")
+def search(q: str):
+    return {"query": q}
+</pre>
+
+<h2>Request Body</h2>
+
+<p>
+FastAPI uses Pydantic models to validate incoming request
+bodies automatically.
+</p>
+
+<pre>
+from pydantic import BaseModel
+
+class User(BaseModel):
+    name: str
+    age: int
+</pre>
+
+<h2>Response Models</h2>
+
+<p>
+Response models ensure APIs always return correctly
+structured data.
+</p>
+
+<pre>
+@app.get("/user", response_model=User)
+def get_user():
+    return User(name="Alice", age=25)
+</pre>
+
+<h2>Dependency Injection</h2>
+
+<p>
+Dependency Injection is one of FastAPI's most powerful
+features. It allows reusable authentication,
+database connections, and configuration logic.
+</p>
+
+<pre>
+from fastapi import Depends
+
+def get_db():
+    ...
+
+@app.get("/items")
+def read_items(db=Depends(get_db)):
+    ...
+</pre>
+
+<h2>Asynchronous Programming</h2>
+
+<p>
+FastAPI supports asynchronous request handling using
+Python's async and await syntax.
+</p>
+
+<pre>
+@app.get("/items")
+async def get_items():
+    return {"status": "ok"}
+</pre>
+
+<p>
+Asynchronous endpoints improve performance when waiting
+for databases, APIs, or file systems.
+</p>
+
+<h2>Background Tasks</h2>
+
+<p>
+Background tasks allow long-running operations to execute
+after a response has been returned.
+</p>
+
+<pre>
+from fastapi import BackgroundTasks
+
+def send_email():
+    ...
+
+@app.post("/register")
+def register(background_tasks: BackgroundTasks):
+    background_tasks.add_task(send_email)
+</pre>
+
+<h2>Automatic Documentation</h2>
+
+<p>
+FastAPI automatically generates interactive API
+documentation.
+</p>
+
+<table border="1">
+
+<tr>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>/docs</td>
+<td>Swagger UI</td>
+</tr>
+
+<tr>
+<td>/redoc</td>
+<td>ReDoc Documentation</td>
+</tr>
+
+<tr>
+<td>/openapi.json</td>
+<td>OpenAPI Specification</td>
+</tr>
+
+</table>
+
+<h2>Error Handling</h2>
+
+<p>
+FastAPI provides HTTPException for returning
+appropriate HTTP status codes.
+</p>
+
+<pre>
+from fastapi import HTTPException
+
+raise HTTPException(
+    status_code=404,
+    detail="User not found"
+)
+</pre>
+
+<h2>Project Structure</h2>
+
+<pre>
+app/
+
+    main.py
+
+    config.py
+
+    api/
+
+    retrieval/
+
+    generation/
+
+    ingestion/
+
+    storage/
+</pre>
+
+<h2>Performance</h2>
+
+<p>
+FastAPI is among the fastest Python web frameworks.
+Performance improvements come from Starlette's ASGI
+implementation and asynchronous request processing.
+</p>
+
+<h2>Security</h2>
+
+<ul>
+<li>OAuth2 Authentication</li>
+<li>JWT Tokens</li>
+<li>API Keys</li>
+<li>CORS Middleware</li>
+<li>HTTPS Support</li>
+</ul>
+
+<h2>Best Practices</h2>
+
+<ul>
+<li>Use Pydantic models for validation.</li>
+<li>Organize endpoints using routers.</li>
+<li>Separate business logic from routes.</li>
+<li>Use dependency injection.</li>
+<li>Validate user input.</li>
+<li>Return structured responses.</li>
+<li>Write unit tests.</li>
+<li>Document every endpoint.</li>
+</ul>
+
+<h2>Summary</h2>
+
+<p>
+FastAPI is a modern, high-performance Python framework
+designed for building production-ready APIs. It combines
+automatic validation, asynchronous programming,
+dependency injection, and automatic documentation,
+making it an excellent choice for machine learning,
+LLM, and RAG applications.
+</p>
+
+<footer>
+Copyright 2026 FastAPI Documentation
+</footer>
+
+</body>
+</html>

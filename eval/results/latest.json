@@ -1,0 +1,583 @@
+{
+  "num_cases": 26,
+  "aggregate_scores": {
+    "correctness": 0.696,
+    "faithfulness": 0.726,
+    "retrieval_relevance": 0.962,
+    "citation_accuracy": 1.0
+  },
+  "aggregate_by_type": {
+    "fact": {
+      "correctness": 0.62,
+      "faithfulness": 0.733,
+      "retrieval_relevance": 1.0,
+      "citation_accuracy": 1.0
+    },
+    "concept": {
+      "correctness": 0.6,
+      "faithfulness": 0.5,
+      "retrieval_relevance": 1.0,
+      "citation_accuracy": 1.0
+    },
+    "command": {
+      "correctness": 0.75,
+      "faithfulness": 0.75,
+      "retrieval_relevance": 1.0,
+      "citation_accuracy": 1.0
+    },
+    "definition": {
+      "correctness": 0.72,
+      "faithfulness": 0.748,
+      "retrieval_relevance": 0.933,
+      "citation_accuracy": 1.0
+    }
+  },
+  "cases": [
+    {
+      "id": "k8s_002",
+      "type": "fact",
+      "question": "Who announced Kubernetes?",
+      "golden_answer": "Google announced Kubernetes.",
+      "generated_answer": "According to the context [1], Google initially announced Kubernetes in 2014.",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-5638a552ae1645a5",
+        "kubernetes.md-recursive_structure-0-6c53e743e832bb37",
+        "docker.pdf-recursive_structure-0-34212be90c9292db",
+        "Kubernetes.pdf-recursive_structure-0-3bada186ef092e54",
+        "kubernetes.md-recursive_structure-0-5638979beecf6215"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 0.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_003",
+      "type": "fact",
+      "question": "When was Kubernetes announced?",
+      "golden_answer": "Kubernetes was announced in 2014.",
+      "generated_answer": "According to the context [2], Kubernetes was originally announced by Google in 2014.",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-5638a552ae1645a5",
+        "docker.pdf-recursive_structure-0-34212be90c9292db",
+        "kubernetes.md-recursive_structure-0-6c53e743e832bb37",
+        "Kubernetes.pdf-recursive_structure-0-3bada186ef092e54",
+        "kubernetes.md-recursive_structure-0-5638979beecf6215"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.9,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_004",
+      "type": "fact",
+      "question": "Which organization received Kubernetes from Google?",
+      "golden_answer": "Google donated Kubernetes to the Cloud Native Computing Foundation (CNCF).",
+      "generated_answer": "Google donated Kubernetes to the Cloud Native Computing Foundation [1].",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-5638a552ae1645a5",
+        "docker.pdf-recursive_structure-0-34212be90c9292db",
+        "Kubernetes.pdf-recursive_structure-1-b6132886094cabf2",
+        "Kubernetes.pdf-recursive_structure-2-97bc53aa263820c5",
+        "Kubernetes.pdf-recursive_structure-0-0822a0ff85cab331"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.9,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_006",
+      "type": "definition",
+      "question": "What is a Kubernetes node?",
+      "golden_answer": "A node is a physical server or virtual machine managed by Kubernetes that runs containers.",
+      "generated_answer": "A Kubernetes node is a bare-metal server, on-premises VM, or VM on a cloud provider that contains a container runtime (for example, Docker Engine), kubelet (responsible for starting, stopping, and managing individual containers by requests from the Kubernetes control plane), and kube-proxy (responsible for networking and load balancing) [1].",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-25dae5d20328236a",
+        "kubernetes.md-recursive_structure-0-6c53e743e832bb37",
+        "Kubernetes.pdf-recursive_structure-0-84be91e96dd42c1e",
+        "Kubernetes.pdf-recursive_structure-1-a60aeb08420bcde9",
+        "Kubernetes.pdf-recursive_structure-1-aed3cfe0da7729b2"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_009",
+      "type": "definition",
+      "question": "What is kube-proxy responsible for?",
+      "golden_answer": "Kube-proxy is responsible for networking and load balancing.",
+      "generated_answer": "Kube-proxy is responsible for networking and load balancing [1].",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-25dae5d20328236a",
+        "Kubernetes.pdf-recursive_structure-0-9bee8546aa361ba5",
+        "Kubernetes.pdf-recursive_structure-0-7d3d98ef2abedad2",
+        "Kubernetes.pdf-recursive_structure-0-3bada186ef092e54",
+        "Kubernetes.pdf-recursive_structure-1-11dea9caa7aec3de"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.8,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_011",
+      "type": "definition",
+      "question": "What is a Pod?",
+      "golden_answer": "A Pod is the smallest deployable unit in Kubernetes consisting of one or more containers sharing networking and storage.",
+      "generated_answer": "A pod is the smallest deployable unit that can be managed by Kubernetes [1]. It represents a \"logical host\" and consists of one or more containers that share the same IP address and port space. Containers within a pod can communicate with each other using standard inter-process communications like SystemV semaphores or POSIX shared memory. Pods are not durable, meaning they will not survive scheduling failures or node failures [1].",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-ad0994be0e00d876",
+        "kubernetes.md-recursive_structure-0-668eb8d0fc7cf78e",
+        "kubernetes_services.html-recursive_structure-0-d67140c973403e69",
+        "Kubernetes.pdf-recursive_structure-1-0a9cc02623da58f8",
+        "Kubernetes.pdf-recursive_structure-1-9de1357926492aac"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 0.75,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_012",
+      "type": "fact",
+      "question": "Do Pods survive node failures?",
+      "golden_answer": "No. Pods are not durable and are recreated when nodes fail.",
+      "generated_answer": "No, pods do not survive node failures [1]. According to the context, if a node where the pod is running dies, the pod is deleted. It can then be replaced by an identical pod, with even the same name, but with a new unique identifier (UID).",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-ad0994be0e00d876",
+        "Kubernetes.pdf-recursive_structure-0-bca0fcbb610e9c2d",
+        "kubernetes.md-recursive_structure-0-7ed66b3e2316ddc1",
+        "Kubernetes.pdf-recursive_structure-1-9de1357926492aac",
+        "troubleshooting.txt-recursive_structure-3-815977ed829b1fec"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.4,
+        "faithfulness": 0.6666666666666666,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_017",
+      "type": "definition",
+      "question": "What is a Kubernetes Service?",
+      "golden_answer": "A Service provides stable networking and access policies for a logical group of Pods.",
+      "generated_answer": "A Kubernetes Service provides a stable network identity (a fixed DNS name and virtual IP) for a set of Pods, even as individual Pods are created, destroyed, or rescheduled [1]. This allows other components in the application to reliably reach each other by name instead of tracking Pod IPs. In essence, a Service abstracts away the ephemeral nature of Pods, providing a stable network identity that can be used consistently across the cluster.",
+      "retrieved_chunk_ids": [
+        "kubernetes_services.html-recursive_structure-0-d67140c973403e69",
+        "kubernetes.md-recursive_structure-0-6c53e743e832bb37",
+        "Kubernetes.pdf-recursive_structure-0-5638a552ae1645a5",
+        "Kubernetes.pdf-recursive_structure-0-84be91e96dd42c1e",
+        "Kubernetes.pdf-recursive_structure-1-f552469d2140cd5b"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.9,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_019",
+      "type": "definition",
+      "question": "What is a Persistent Volume?",
+      "golden_answer": "A Persistent Volume is cluster storage with a lifecycle independent of Pods.",
+      "generated_answer": "A persistent volume represents a real networked storage unit in a cluster that has been provisioned by an administrator [1]. It supports different access modes, such as mounting as read-write by a single node, mounting as read-only by many nodes, and mounting as read-write by many nodes. Persistent volumes have a lifecycle independent of any individual pod, meaning they exist even if a pod is deleted or recreated.",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-1-babdcc28f9025557",
+        "Kubernetes.pdf-recursive_structure-0-5d1c3e5d845c721b",
+        "Kubernetes.pdf-recursive_structure-2-8636e054ae9b61e9",
+        "Kubernetes.pdf-recursive_structure-1-6b441e44617d4bbd",
+        "Kubernetes.pdf-recursive_structure-1-d2befd8448dc4ee6"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.8,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_022",
+      "type": "definition",
+      "question": "What is a ConfigMap?",
+      "golden_answer": "A ConfigMap stores application configuration separately from container images.",
+      "generated_answer": "A ConfigMap is a way to store and manage configuration data for applications running in Kubernetes [1]. It allows you to externalize configuration settings from container images, making it easier to manage and update application configurations.\n\nIn Kubernetes, a ConfigMap can be used to store key-value pairs of configuration data, such as database connection strings or API keys. These values can then be injected into containers at runtime, allowing the application to access the configuration data without having to hardcode it into the container image.\n\nConfigMaps are typically created using the `kubectl create configmap` command, and they can be used in a variety of ways, such as by referencing them in deployment configurations or by injecting their values into containers.",
+      "retrieved_chunk_ids": [
+        "kubernetes.md-recursive_structure-0-715f90b59500f36e",
+        "kubectl_cheatsheet.txt-recursive_structure-5-9702fa11f6d53b1a",
+        "fast_api.html-recursive_structure-0-a33511a113c5ec70",
+        "github_actions.pdf-recursive_structure-1-2af1c3ddfe090957",
+        "wellarchitected-aws.pdf-recursive_structure-2-6daccc9ecf06c791"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.9,
+        "faithfulness": 0.8,
+        "retrieval_relevance": 0.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_023",
+      "type": "definition",
+      "question": "What is a DaemonSet?",
+      "golden_answer": "A DaemonSet ensures a copy of a Pod runs on every selected node.",
+      "generated_answer": "A DaemonSet [2] is used to ensure that all or some nodes run a copy of a pod. It tracks the addition and removal of cluster nodes and adds pods for nodes that are added to the cluster, terminates pods on nodes that are being removed from a cluster. Deleting a DaemonSet will clean up the pods it created.",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-83df003094529f66",
+        "Kubernetes.pdf-recursive_structure-1-d1fbba0a53ea2e82",
+        "Kubernetes.pdf-recursive_structure-2-208af9ec4f093e3b",
+        "kubernetes.md-recursive_structure-0-87824ed33831f0e0",
+        "Kubernetes.pdf-recursive_structure-0-ad0994be0e00d876"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 0.6666666666666666,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "k8s_027",
+      "type": "fact",
+      "question": "Which command displays logs for a Pod?",
+      "golden_answer": "The kubectl logs command displays logs for a Pod.",
+      "generated_answer": "The `kubectl logs` command displays logs for a Pod [2].",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-2fd56e4232cc0491",
+        "kubernetes.md-recursive_structure-0-aeda78eb0476cbe5",
+        "Kubernetes.pdf-recursive_structure-1-e087015709dc8db7",
+        "Kubernetes.pdf-recursive_structure-4-71bd5ebb1ca3706a",
+        "Kubernetes.pdf-recursive_structure-3-5c803fd0d144c23b"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.3,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_002",
+      "type": "definition",
+      "question": "What is a Docker container?",
+      "golden_answer": "A Docker container is a temporary writable filesystem layered on top of an immutable Docker image with its own process group and network stack.",
+      "generated_answer": "A Docker container is a temporary file system that is layered over an immutable Docker image [3]. It is fully writable using copy-on-write technology and has its own private address by default in the 172.17.x.x range [3]. The container also includes a network stack, process group, main process, and sub-processes that are SIGKILLED when the main process exits [3].",
+      "retrieved_chunk_ids": [
+        "docker.md-recursive_structure-0-d71bb521520fcd13",
+        "docker.pdf-recursive_structure-0-7858f10ed472885a",
+        "docker.pdf-recursive_structure-0-22b744011e7eebb9",
+        "github_actions.pdf-recursive_structure-1-f568476515a094c1",
+        "docker.pdf-recursive_structure-0-15daee2153eee362"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 0.6666666666666666,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_011",
+      "type": "command",
+      "question": "Which command displays logs generated by a container?",
+      "golden_answer": "The docker logs command displays a container's stdout and stderr output.",
+      "generated_answer": "The `docker logs` command displays logs generated by a container [2].",
+      "retrieved_chunk_ids": [
+        "Kubernetes.pdf-recursive_structure-0-2fd56e4232cc0491",
+        "docker.pdf-recursive_structure-0-19ee30e813692b6d",
+        "docker.md-recursive_structure-0-5271bbb3050865ea",
+        "docker.pdf-recursive_structure-0-945ef15a5a2c4802",
+        "docker.pdf-recursive_structure-0-3de821f988e07700"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_013",
+      "type": "concept",
+      "question": "What does the --rm option do in docker run?",
+      "golden_answer": "The --rm option automatically removes the container after it exits.",
+      "generated_answer": "The `--rm` option in `docker run` removes the container when it exits [4].",
+      "retrieved_chunk_ids": [
+        "github_actions.pdf-recursive_structure-0-7d6b2887f6fd2fe4",
+        "docker.pdf-recursive_structure-0-39ba0f76bc86a8b0",
+        "docker.pdf-recursive_structure-0-a89116e552735aaf",
+        "docker.pdf-recursive_structure-0-cba30de2f6cdd6ef",
+        "docker.pdf-recursive_structure-0-d16090ce690090cb"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 0.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_014",
+      "type": "command",
+      "question": "What does the -d option do in docker run?",
+      "golden_answer": "The -d option starts the container in detached mode.",
+      "generated_answer": "The `-d` option in `docker run` runs a container in detached mode [2]. This means that when you run a container with `-d`, Docker will start the container and return immediately, without waiting for it to finish. The container's process ID is displayed on the console, but you cannot see its output or interact with it directly.",
+      "retrieved_chunk_ids": [
+        "docker_networking.html-recursive_structure-0-c43a3469496ffa02",
+        "docker.pdf-recursive_structure-0-ce226685c9f49ade",
+        "docker.pdf-recursive_structure-0-945ef15a5a2c4802",
+        "docker.pdf-recursive_structure-0-1739d87e7459c5e9",
+        "docker.pdf-recursive_structure-0-f097bcc795fc73ad"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.9,
+        "faithfulness": 0.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_016",
+      "type": "definition",
+      "question": "What is a bind mount in Docker?",
+      "golden_answer": "A bind mount maps a directory from the host filesystem into a container.",
+      "generated_answer": "A bind mount in Docker maps a host directory directly into the container [2]. This allows you to use files from the host system within the container, and vice versa. The `docker run` command with the `-v` option creates or mounts the location on the host filesystem at the specified path inside the container [1].\n\nFor example:\n```bash\ndocker run -v mydata:/var/lib/postgresql/data postgres:16\n```\nThis command mounts the directory `/mydata` from the host system to the path `/var/lib/postgresql/data` inside the container. This allows you to store persistent data outside of the container, and also provides a way for the container to access files on the host system.\n\nBind mounts are useful for local development with live code reload, as changes made to the mounted directory will be reflected in the container [2].",
+      "retrieved_chunk_ids": [
+        "docker.pdf-recursive_structure-0-1739d87e7459c5e9",
+        "docker.md-recursive_structure-0-9a3c2d8037b1c2da",
+        "docker.pdf-recursive_structure-0-731814aedd261e02",
+        "docker.pdf-recursive_structure-0-ccbae9c331d48cac",
+        "Kubernetes.pdf-recursive_structure-1-81cbf417ff121261"
+      ],
+      "num_citations": 2,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 0.8333333333333334,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_017",
+      "type": "definition",
+      "question": "What is a named volume?",
+      "golden_answer": "A named volume is Docker-managed persistent storage stored under Docker's volume directory.",
+      "generated_answer": "A named volume in Docker is a managed volume that persists independently of container lifecycle [2]. It is stored inside /var/lib/docker and is lifecycle managed with the docker volume command [1]. Named volumes are created empty, whereas bind volumes are created with a copy of the image content at the same mount point [3]. This means that named volumes can be used to store data that needs to persist across container restarts or even across different containers in the same pod.",
+      "retrieved_chunk_ids": [
+        "docker.md-recursive_structure-0-9a3c2d8037b1c2da",
+        "docker.pdf-recursive_structure-0-39ba0f76bc86a8b0",
+        "docker.pdf-recursive_structure-0-731814aedd261e02",
+        "docker.pdf-recursive_structure-0-dbf5d8fa4a96b6e7",
+        "Kubernetes.pdf-recursive_structure-0-5d1c3e5d845c721b"
+      ],
+      "num_citations": 3,
+      "scores": {
+        "correctness": 0.8,
+        "faithfulness": 0.5,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_019",
+      "type": "command",
+      "question": "How can a host port be exposed to a container?",
+      "golden_answer": "Use the -p option in docker run to publish a host port to a container port.",
+      "generated_answer": "A host port can be exposed to a container using the `-p` option, as shown in [2]. For example: `docker run -p 8000:8000 my-fastapi-image`. This exposes port 8000 on the host machine to port 8000 inside the container.",
+      "retrieved_chunk_ids": [
+        "docker_networking.html-recursive_structure-0-09761851f3a4b9b5",
+        "docker_networking.html-recursive_structure-0-d912c24b432f3d52",
+        "github_actions.pdf-recursive_structure-1-31a105b71a29ea9c",
+        "docker.md-recursive_structure-0-1e1052af45c796f0",
+        "docker.pdf-recursive_structure-3-3ce5ecaede4bdfb8"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.8,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_021",
+      "type": "command",
+      "question": "Which instruction specifies the base image in a Dockerfile?",
+      "golden_answer": "The FROM instruction specifies the base image.",
+      "generated_answer": "The `FROM` instruction [1] specifies the base image in a Dockerfile.",
+      "retrieved_chunk_ids": [
+        "docker.md-recursive_structure-0-9a67248b471e8937",
+        "github_actions.pdf-recursive_structure-2-6d7c4d42148bef21",
+        "docker.pdf-recursive_structure-0-914009f62537b299",
+        "github_actions.pdf-recursive_structure-0-a1dd97aa99ab0b1a",
+        "docker.md-recursive_structure-0-46beb1f6375e426a"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.7,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_023",
+      "type": "definition",
+      "question": "What is the purpose of the COPY instruction?",
+      "golden_answer": "The COPY instruction copies files from the build context into the image.",
+      "generated_answer": "The COPY instruction copies files from the host into the image [1]. It can be used to copy files from a specific path on the host into the container at a specified destination location. The COPY instruction is similar to the ADD instruction, but it does not untar archives or accept HTTP URLs [1].",
+      "retrieved_chunk_ids": [
+        "docker.pdf-recursive_structure-0-8902157df4c79735",
+        "docker.md-recursive_structure-0-9a67248b471e8937",
+        "wellarchitected-aws.pdf-recursive_structure-2-c8e9063de3a95a86",
+        "wellarchitected-aws.pdf-recursive_structure-1-cd1fd66206810f8a",
+        "github_actions.pdf-recursive_structure-1-a71160bf7700845b"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.7,
+        "faithfulness": 0.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_025",
+      "type": "definition",
+      "question": "What does the EXPOSE instruction declare?",
+      "golden_answer": "The EXPOSE instruction documents the network ports used by the container.",
+      "generated_answer": "The EXPOSE instruction declares which port(s) a container listens on [5].",
+      "retrieved_chunk_ids": [
+        "docker.pdf-recursive_structure-0-3de821f988e07700",
+        "docker.md-recursive_structure-0-9a67248b471e8937",
+        "github_actions.pdf-recursive_structure-1-86917d69622589a5",
+        "Kubernetes.pdf-recursive_structure-1-009467df21844485",
+        "docker.pdf-recursive_structure-1-a937e651260da86e"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_026",
+      "type": "concept",
+      "question": "What is Docker build cache?",
+      "golden_answer": "Docker build cache reuses previously built image layers when the build instructions and inputs have not changed.",
+      "generated_answer": "The Docker builder uses a cache to store previous builds and have quick iterations [3]. Each layer created by the builder is fingerprinted according to the ID of the previous image, the command and its arguments, and the content of the imported files (for ADD and COPY). When rebuilding an image, Docker will reuse a previous image if its fingerprint is the same.",
+      "retrieved_chunk_ids": [
+        "docker.pdf-recursive_structure-0-9a69c69e6f5dd5ab",
+        "docker.pdf-recursive_structure-0-7858f10ed472885a",
+        "docker.pdf-recursive_structure-0-bf6b20c0d90a0ea9",
+        "docker.pdf-recursive_structure-0-ffc5a5f068296950",
+        "docker.md-recursive_structure-0-3084a1d2ad848df5"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_027",
+      "type": "definition",
+      "question": "What is a multi-stage Docker build?",
+      "golden_answer": "A multi-stage build uses multiple FROM statements to separate build and runtime environments, producing smaller final images.",
+      "generated_answer": "A multi-stage Docker build [1] separates build-time dependencies from runtime dependencies, keeping final images small. This approach allows for more efficient image sizes and reduced layer counts by excluding unnecessary files and tools from the final image.",
+      "retrieved_chunk_ids": [
+        "docker.md-recursive_structure-0-7a4d29813842fa87",
+        "docker.md-recursive_structure-0-cd7a8eafb7ac4fc3",
+        "troubleshooting.txt-recursive_structure-2-0acf928da9cc0759",
+        "docker.pdf-recursive_structure-0-7858f10ed472885a",
+        "docker.pdf-recursive_structure-0-9a69c69e6f5dd5ab"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.6,
+        "faithfulness": 0.5,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_028",
+      "type": "definition",
+      "question": "What is Docker Compose used for?",
+      "golden_answer": "Docker Compose is used to configure and deploy multiple containers as a single application.",
+      "generated_answer": "Docker Compose [2] is used to define and run multi-container applications from a single YAML file. It enables developers to quickly assemble applications from components and eliminates the friction between development, QA, and production environments.",
+      "retrieved_chunk_ids": [
+        "docker_networking.html-recursive_structure-0-6e1ae761f2fd9c03",
+        "docker.md-recursive_structure-0-43a401b4a94927ea",
+        "docker.pdf-recursive_structure-0-7858f10ed472885a",
+        "docker_networking.html-recursive_structure-0-dff5ff0ac1a32551",
+        "github_actions.pdf-recursive_structure-1-f568476515a094c1"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.9,
+        "faithfulness": 1.0,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    },
+    {
+      "id": "docker_029",
+      "type": "definition",
+      "question": "What is Docker Swarm?",
+      "golden_answer": "Docker Swarm is Docker's clustering solution for managing multiple Docker hosts and deploying services.",
+      "generated_answer": "Docker Swarm [2] is a standalone server that provides a turnkey cluster for managing a group of hosts running Docker. It was initially released as an early solution in December 2014, but has since become part of the Docker Engine API and is now embedded within it, starting from version 1.12 in July 2016 [2].",
+      "retrieved_chunk_ids": [
+        "docker.pdf-recursive_structure-0-5655cfd5c51cecc0",
+        "docker.pdf-recursive_structure-0-1d62e1c0e181050f",
+        "docker.pdf-recursive_structure-0-ffc5a5f068296950",
+        "docker.pdf-recursive_structure-0-7858f10ed472885a",
+        "docker.pdf-recursive_structure-0-59981197188cf1f1"
+      ],
+      "num_citations": 1,
+      "scores": {
+        "correctness": 0.8,
+        "faithfulness": 0.5,
+        "retrieval_relevance": 1.0,
+        "citation_accuracy": 1.0
+      }
+    }
+  ]
+}

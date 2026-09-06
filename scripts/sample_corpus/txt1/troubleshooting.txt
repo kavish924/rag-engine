@@ -1,0 +1,169 @@
+========================================================
+TROUBLESHOOTING CHEATSHEET (MLOps / Dev Stack)
+========================================================
+
+--------------------------------------------------------
+1. PYTHON / ENVIRONMENT ISSUES
+--------------------------------------------------------
+SYMPTOM: ModuleNotFoundError
+  - Check active venv: `which python` (Linux/WSL) or `where python` (PowerShell)
+  - Reinstall: pip install -r requirements.txt
+  - Confirm correct interpreter selected in VS Code (bottom-right corner)
+
+SYMPTOM: Package version conflicts
+  - pip list                        # See installed versions
+  - pip show <package>               # Check specific package + dependencies
+  - pip install <package>==<version> # Pin to known-good version
+  - Consider a fresh venv: python -m venv venv_new
+
+SYMPTOM: CUDA/GPU not detected in training script
+  - nvidia-smi                       # Confirm GPU visible to OS
+  - python -c "import torch; print(torch.cuda.is_available())"
+  - Check CUDA toolkit version matches installed framework build
+  - For XGBoost/LightGBM/CatBoost: confirm GPU-enabled build installed
+    (e.g. `pip install xgboost` may be CPU-only; check docs for GPU wheel)
+
+
+--------------------------------------------------------
+2. DOCKER ISSUES
+--------------------------------------------------------
+SYMPTOM: Container exits immediately
+  - docker logs <container>          # Check exit reason
+  - docker run -it <image> bash       # Run interactively to debug entrypoint
+
+SYMPTOM: "port already in use"
+  - lsof -i :<port>  (Linux/WSL) or netstat -ano | findstr :<port> (PowerShell)
+  - Kill the conflicting process or map to a different host port
+
+SYMPTOM: Image build fails / huge image size
+  - Use multi-stage builds
+  - Add .dockerignore (exclude venv, __pycache__, data/, .git)
+  - docker system df                  # Check disk usage by images/containers
+  - docker system prune -a            # Clean unused images/containers (careful)
+
+SYMPTOM: Container can't reach host services (e.g. local Postgres)
+  - Use `host.docker.internal` instead of `localhost` inside container
+    (works on Docker Desktop for Windows/Mac)
+
+
+--------------------------------------------------------
+3. KUBERNETES / K3D ISSUES
+--------------------------------------------------------
+SYMPTOM: Pod stuck in "Pending"
+  - kubectl describe pod <name>       # Check Events section for reason
+  - Common cause: insufficient CPU/memory requests vs node capacity
+  - kubectl top nodes                 # Check node resource availability
+
+SYMPTOM: Pod stuck in "CrashLoopBackOff"
+  - kubectl logs <pod> --previous     # Logs from the crashed instance
+  - kubectl describe pod <pod>        # Check restart count, last state reason
+  - Common causes: missing env vars/secrets, failed health checks,
+    app crashing on startup due to missing dependency
+
+SYMPTOM: Pod stuck in "ImagePullBackOff"
+  - kubectl describe pod <pod>        # Check image name/tag typo
+  - If using local image with k3d: import it first:
+    k3d image import <image-name> -c <cluster-name>
+
+SYMPTOM: Service not reachable
+  - kubectl get endpoints <service>   # Confirm it has matching pod IPs
+  - kubectl get pods --show-labels    # Confirm labels match service selector
+  - kubectl port-forward svc/<name> 8080:80   # Test directly bypassing ingress
+
+SYMPTOM: HPA not scaling
+  - kubectl describe hpa <name>       # Check "unable to get metrics" errors
+  - Confirm metrics-server is installed and running:
+    kubectl get pods -n kube-system | grep metrics-server
+
+
+--------------------------------------------------------
+4. AWS CLI / S3 ISSUES
+--------------------------------------------------------
+SYMPTOM: "Unable to locate credentials"
+  - aws configure list                # Check active profile
+  - export AWS_PROFILE=<profile-name> # Switch profile if using named profiles
+
+SYMPTOM: AccessDenied on S3 operation
+  - aws sts get-caller-identity       # Confirm which identity is being used
+  - aws iam list-attached-user-policies --user-name <user>
+  - Check bucket policy isn't blocking the action
+
+SYMPTOM: aws s3 sync uploads/downloads nothing
+  - Check --include/--exclude filter order (S3 CLI applies filters sequentially)
+  - Run with --dryrun first to preview what would sync
+
+
+--------------------------------------------------------
+5. MLFLOW ISSUES
+--------------------------------------------------------
+SYMPTOM: MLflow UI shows no experiments/runs
+  - Confirm MLFLOW_TRACKING_URI matches where runs were logged
+  - echo $MLFLOW_TRACKING_URI  (or check mlflow.get_tracking_uri() in script)
+
+SYMPTOM: "database is locked" (SQLite backend)
+  - Common under concurrent runs; switch to PostgreSQL backend for
+    multi-process/parallel Optuna tuning
+
+SYMPTOM: Artifacts not saving
+  - Check artifact_location config on the experiment
+  - Confirm write permissions on the artifact store path (local dir or S3)
+
+
+--------------------------------------------------------
+6. GIT ISSUES
+--------------------------------------------------------
+SYMPTOM: Merge conflicts
+  - git status                        # See conflicted files
+  - Resolve manually, then:
+    git add <file> && git commit
+
+SYMPTOM: Accidentally committed large files / secrets
+  - git rm --cached <file>            # Untrack without deleting locally
+  - Add to .gitignore
+  - For history cleanup: use `git filter-repo` or BFG Repo-Cleaner
+
+SYMPTOM: Detached HEAD state
+  - git checkout <branch-name>        # Return to a branch
+  - git branch temp-branch            # Save current work if needed first
+
+
+--------------------------------------------------------
+7. NETWORK / API DEBUGGING
+--------------------------------------------------------
+SYMPTOM: FastAPI/backend not responding
+  - curl -v http://localhost:8000/health   # Verbose check for connectivity
+  - Check process is actually running: ps aux | grep uvicorn
+  - Check correct port bound: ss -tulnp | grep 8000
+
+SYMPTOM: CORS errors from frontend (Next.js) calling backend
+  - Confirm CORSMiddleware configured in FastAPI with correct allowed origins
+  - Check browser dev tools Network tab for exact preflight failure reason
+
+SYMPTOM: Slow API responses
+  - Check for blocking synchronous calls in async endpoints
+  - Profile with `time curl ...` or add request timing middleware
+
+
+--------------------------------------------------------
+8. GENERAL DEBUGGING WORKFLOW
+--------------------------------------------------------
+1. Reproduce the issue reliably (note exact command/input)
+2. Check the most recent logs first (`kubectl logs`, `docker logs`, app logs)
+3. Isolate the layer: is it app code, container, cluster, network, or cloud IAM?
+4. Change one variable at a time when testing fixes
+5. Once fixed, document root cause + fix (useful for interview "debugging story"
+   answers, and for your own future reference)
+
+
+--------------------------------------------------------
+NOTES (for your Windows/PowerShell + VS Code setup)
+--------------------------------------------------------
+- Prefer WSL2 for Linux-native tooling (Docker, k3d, kubectl) — fewer path
+  and permission quirks than native PowerShell.
+- In PowerShell, replace `lsof`/`grep` equivalents with:
+    netstat -ano | findstr :<port>
+    Select-String "pattern" file.txt
+- Keep a personal "incident log" of tricky bugs you hit on the credit risk
+  pipeline (e.g. GPU driver mismatches, MLflow backend migration issues) —
+  these make excellent STAR-format answers in MLOps interviews.
+========================================================

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nginx Guide</title>
+</head>
+
+<body>
+
+<nav>
+    <ul>
+        <li>Introduction</li>
+        <li>Installation</li>
+        <li>Reverse Proxy</li>
+        <li>Load Balancing</li>
+        <li>Security</li>
+    </ul>
+</nav>
+
+<h1>Nginx Guide</h1>
+
+<p>
+Nginx is a high-performance web server, reverse proxy, load balancer,
+and HTTP cache. It is widely used for serving static content,
+routing application traffic, SSL termination, and improving
+application scalability.
+</p>
+
+<h2>Key Features</h2>
+
+<ul>
+    <li>High Performance</li>
+    <li>Reverse Proxy</li>
+    <li>Load Balancing</li>
+    <li>SSL Termination</li>
+    <li>Static File Serving</li>
+    <li>HTTP Caching</li>
+</ul>
+
+<h2>Architecture</h2>
+
+<p>
+Nginx follows an event-driven asynchronous architecture.
+Unlike traditional web servers that create one thread
+per connection, Nginx efficiently handles thousands
+of concurrent connections using a small number of worker
+processes.
+</p>
+
+<h3>Master Process</h3>
+
+<p>
+The master process reads configuration files,
+starts worker processes, and manages reloads.
+</p>
+
+<h3>Worker Processes</h3>
+
+<p>
+Worker processes handle incoming HTTP requests.
+Each worker can process thousands of simultaneous
+connections efficiently.
+</p>
+
+<h2>Installation</h2>
+
+<pre>
+Ubuntu
+
+sudo apt update
+
+sudo apt install nginx
+</pre>
+
+<pre>
+CentOS
+
+sudo yum install nginx
+</pre>
+
+<pre>
+Start Service
+
+sudo systemctl start nginx
+
+sudo systemctl enable nginx
+</pre>
+
+<h2>Configuration File</h2>
+
+<p>
+The main configuration file is usually located at:
+</p>
+
+<pre>
+/etc/nginx/nginx.conf
+</pre>
+
+<p>
+Additional site configurations are commonly stored in:
+</p>
+
+<pre>
+/etc/nginx/sites-available/
+
+/etc/nginx/sites-enabled/
+</pre>
+
+<h2>Basic Server Block</h2>
+
+<pre>
+server {
+
+    listen 80;
+
+    server_name example.com;
+
+    root /var/www/html;
+
+    index index.html;
+
+}
+</pre>
+
+<h2>Reverse Proxy</h2>
+
+<p>
+A reverse proxy forwards client requests to backend
+application servers while hiding their internal
+implementation.
+</p>
+
+<pre>
+server {
+
+    listen 80;
+
+    location / {
+
+        proxy_pass http://localhost:8000;
+
+    }
+
+}
+</pre>
+
+<p>
+This configuration is commonly used for FastAPI,
+Django, Flask, and Node.js applications.
+</p>
+
+<h2>Load Balancing</h2>
+
+<p>
+Nginx can distribute incoming requests across multiple
+backend servers.
+</p>
+
+<pre>
+upstream backend {
+
+    server 10.0.0.1;
+
+    server 10.0.0.2;
+
+    server 10.0.0.3;
+
+}
+
+server {
+
+    location / {
+
+        proxy_pass http://backend;
+
+    }
+
+}
+</pre>
+
+<h3>Load Balancing Algorithms</h3>
+
+<ul>
+    <li>Round Robin</li>
+    <li>Least Connections</li>
+    <li>IP Hash</li>
+    <li>Weighted Round Robin</li>
+</ul>
+
+<h2>Serving Static Files</h2>
+
+<p>
+Nginx is optimized for serving HTML,
+CSS, JavaScript, and image files.
+</p>
+
+<pre>
+location /static/ {
+
+    root /var/www/project;
+
+}
+</pre>
+
+<h2>HTTPS Configuration</h2>
+
+<p>
+SSL certificates enable encrypted communication
+between clients and servers.
+</p>
+
+<pre>
+server {
+
+    listen 443 ssl;
+
+    ssl_certificate certificate.crt;
+
+    ssl_certificate_key private.key;
+
+}
+</pre>
+
+<h2>HTTP to HTTPS Redirect</h2>
+
+<pre>
+server {
+
+    listen 80;
+
+    return 301 https://$host$request_uri;
+
+}
+</pre>
+
+<h2>Compression</h2>
+
+<p>
+Gzip compression reduces response size
+and improves page load performance.
+</p>
+
+<pre>
+gzip on;
+
+gzip_types text/plain text/css application/json;
+</pre>
+
+<h2>Caching</h2>
+
+<p>
+Nginx can cache responses to reduce backend
+load and improve response time.
+</p>
+
+<pre>
+proxy_cache_path /tmp/cache levels=1:2
+keys_zone=my_cache:10m;
+</pre>
+
+<h2>Common HTTP Status Codes</h2>
+
+<table border="1">
+
+<tr>
+
+<th>Status</th>
+
+<th>Description</th>
+
+</tr>
+
+<tr>
+
+<td>200</td>
+
+<td>OK</td>
+
+</tr>
+
+<tr>
+
+<td>301</td>
+
+<td>Permanent Redirect</td>
+
+</tr>
+
+<tr>
+
+<td>400</td>
+
+<td>Bad Request</td>
+
+</tr>
+
+<tr>
+
+<td>401</td>
+
+<td>Unauthorized</td>
+
+</tr>
+
+<tr>
+
+<td>403</td>
+
+<td>Forbidden</td>
+
+</tr>
+
+<tr>
+
+<td>404</td>
+
+<td>Not Found</td>
+
+</tr>
+
+<tr>
+
+<td>500</td>
+
+<td>Internal Server Error</td>
+
+</tr>
+
+<tr>
+
+<td>502</td>
+
+<td>Bad Gateway</td>
+
+</tr>
+
+<tr>
+
+<td>504</td>
+
+<td>Gateway Timeout</td>
+
+</tr>
+
+</table>
+
+<h2>Security Best Practices</h2>
+
+<ul>
+
+<li>Disable server version exposure.</li>
+
+<li>Use HTTPS.</li>
+
+<li>Enable security headers.</li>
+
+<li>Limit request size.</li>
+
+<li>Restrict directory listing.</li>
+
+<li>Use firewall rules.</li>
+
+<li>Keep Nginx updated.</li>
+
+</ul>
+
+<h2>Monitoring</h2>
+
+<p>
+Monitor CPU usage, memory consumption,
+active connections, request rate,
+and response time.
+</p>
+
+<h2>Nginx with FastAPI</h2>
+
+<p>
+A common production architecture places
+Nginx in front of a FastAPI application.
+Nginx handles HTTPS termination,
+serves static files,
+and forwards API requests
+to Uvicorn running FastAPI.
+</p>
+
+<pre>
+Client
+
+↓
+
+Nginx
+
+↓
+
+Uvicorn
+
+↓
+
+FastAPI
+
+</pre>
+
+<h2>Troubleshooting</h2>
+
+<h3>502 Bad Gateway</h3>
+
+<ul>
+
+<li>Backend application is down.</li>
+
+<li>Incorrect proxy_pass address.</li>
+
+<li>Firewall blocking backend.</li>
+
+</ul>
+
+<h3>404 Not Found</h3>
+
+<ul>
+
+<li>Incorrect root directory.</li>
+
+<li>Missing index file.</li>
+
+<li>Wrong location block.</li>
+
+</ul>
+
+<h3>Permission Denied</h3>
+
+<ul>
+
+<li>Incorrect file ownership.</li>
+
+<li>SELinux restrictions.</li>
+
+<li>Directory permissions.</li>
+
+</ul>
+
+<h2>Useful Commands</h2>
+
+<pre>
+sudo nginx -t
+
+sudo systemctl restart nginx
+
+sudo systemctl reload nginx
+
+sudo systemctl status nginx
+</pre>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+<li>Separate configuration into multiple files.</li>
+
+<li>Always validate configuration before reload.</li>
+
+<li>Use HTTPS in production.</li>
+
+<li>Enable gzip compression.</li>
+
+<li>Configure caching for static assets.</li>
+
+<li>Monitor logs regularly.</li>
+
+<li>Limit request rates to prevent abuse.</li>
+
+</ul>
+
+<h2>Summary</h2>
+
+<p>
+Nginx is one of the most widely used web servers
+and reverse proxies in cloud-native applications.
+It efficiently serves static content,
+balances traffic across backend services,
+provides SSL termination,
+and integrates seamlessly with FastAPI,
+Docker, Kubernetes, and cloud infrastructure.
+</p>
+
+<footer>
+
+Nginx Documentation
+
+</footer>
+
+</body>
+
+</html>

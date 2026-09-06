@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Docker Networking Cheatsheet</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #2a2e38;
+    --text: #e4e6eb;
+    --muted: #9aa0ac;
+    --accent: #4fb0ff;
+    --code-bg: #1d2129;
+    --green: #6fd08c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 1.9rem;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--muted); margin-bottom: 40px; font-size: 0.95rem; }
+  h2 {
+    font-size: 1.25rem;
+    color: var(--accent);
+    margin-top: 44px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before {
+    content: "";
+    width: 6px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+  }
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .card p.desc {
+    color: var(--muted);
+    margin: 0 0 12px;
+    font-size: 0.92rem;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    margin: 0;
+    font-size: 0.88rem;
+  }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    color: var(--green);
+  }
+  .tag {
+    display: inline-block;
+    background: rgba(79,176,255,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(79,176,255,0.35);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    margin-bottom: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--accent); font-weight: 600; }
+  .note {
+    background: rgba(111,208,140,0.08);
+    border-left: 3px solid var(--green);
+    padding: 12px 16px;
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+  <h1>Docker Networking Cheatsheet</h1>
+  <p class="subtitle">Network modes, common commands, and debugging patterns for containerized ML/backend services.</p>
+
+  <h2>Network Modes</h2>
+  <div class="card">
+    <table>
+      <tr><th>Mode</th><th>Behavior</th><th>Typical Use</th></tr>
+      <tr><td><code>bridge</code></td><td>Default. Isolated internal network, NAT to host.</td><td>Standalone containers, dev environments</td></tr>
+      <tr><td><code>host</code></td><td>Container shares host's network stack directly.</td><td>Performance-sensitive services, avoiding NAT overhead</td></tr>
+      <tr><td><code>none</code></td><td>No networking at all.</td><td>Fully isolated/offline jobs</td></tr>
+      <tr><td><code>overlay</code></td><td>Multi-host network for Swarm/cluster setups.</td><td>Multi-node container orchestration</td></tr>
+      <tr><td><code>macvlan</code></td><td>Container gets its own MAC/IP on physical network.</td><td>Legacy apps needing direct LAN presence</td></tr>
+    </table>
+  </div>
+
+  <h2>Core Commands</h2>
+
+  <div class="card">
+    <span class="tag">list</span>
+    <h3>List networks</h3>
+    <pre><code>docker network ls</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">inspect</span>
+    <h3>Inspect a network</h3>
+    <p class="desc">Shows connected containers, subnet, gateway, driver.</p>
+    <pre><code>docker network inspect &lt;network-name&gt;</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">create</span>
+    <h3>Create a custom bridge network</h3>
+    <p class="desc">Custom networks give containers DNS resolution by name — unlike the default bridge.</p>
+    <pre><code>docker network create my-app-network</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">connect</span>
+    <h3>Attach a running container to a network</h3>
+    <pre><code>docker network connect my-app-network &lt;container-name&gt;</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">disconnect</span>
+    <h3>Detach a container from a network</h3>
+    <pre><code>docker network disconnect my-app-network &lt;container-name&gt;</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">run</span>
+    <h3>Run a container on a specific network</h3>
+    <pre><code>docker run -d --name api --network my-app-network my-image</code></pre>
+  </div>
+
+  <div class="card">
+    <span class="tag">remove</span>
+    <h3>Remove unused networks</h3>
+    <pre><code>docker network prune</code></pre>
+  </div>
+
+  <h2>Container-to-Container Communication</h2>
+  <div class="card">
+    <h3>Using a custom network + service names</h3>
+    <p class="desc">On a user-defined bridge network, containers resolve each other by container name via Docker's embedded DNS.</p>
+    <pre><code>docker network create backend-net
+
+docker run -d --name postgres-db --network backend-net postgres:16
+docker run -d --name fastapi-app --network backend-net my-fastapi-image
+
+# Inside fastapi-app, connect using:
+# postgresql://user:pass@postgres-db:5432/dbname</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>docker-compose (auto-networking)</h3>
+    <p class="desc">Compose creates a network automatically; services reach each other by service name.</p>
+    <pre><code>services:
+  api:
+    build: .
+    depends_on:
+      - db
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: example
+
+# Inside 'api' container: connect to host "db", not "localhost"</code></pre>
+  </div>
+
+  <h2>Host ↔ Container Communication</h2>
+  <div class="card">
+    <h3>Port mapping</h3>
+    <p class="desc">Expose a container port to the host machine.</p>
+    <pre><code>docker run -p 8000:8000 my-fastapi-image
+# host_port:container_port</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Reaching host services from inside a container</h3>
+    <p class="desc">On Docker Desktop (Windows/Mac), use the special DNS name instead of localhost.</p>
+    <pre><code>host.docker.internal
+
+# Example: connecting to a Postgres instance running on your host machine
+postgresql://user:pass@host.docker.internal:5432/dbname</code></pre>
+  </div>
+
+  <h2>Debugging Networking Issues</h2>
+
+  <div class="card">
+    <h3>Check which network a container is on</h3>
+    <pre><code>docker inspect &lt;container&gt; --format='{{json .NetworkSettings.Networks}}'</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Test connectivity between containers</h3>
+    <pre><code>docker exec -it &lt;container&gt; ping &lt;other-container-name&gt;
+docker exec -it &lt;container&gt; curl http://&lt;other-container-name&gt;:&lt;port&gt;</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>Check exposed/listening ports inside a container</h3>
+    <pre><code>docker exec -it &lt;container&gt; netstat -tulnp
+# or, if netstat isn't installed:
+docker exec -it &lt;container&gt; ss -tulnp</code></pre>
+  </div>
+
+  <div class="card">
+    <h3>"Connection refused" checklist</h3>
+    <table>
+      <tr><td>1.</td><td>Is the target container actually running? <code>docker ps</code></td></tr>
+      <tr><td>2.</td><td>Are both containers on the same custom network?</td></tr>
+      <tr><td>3.</td><td>Is the app inside the container binding to <code>0.0.0.0</code>, not <code>127.0.0.1</code>?</td></tr>
+      <tr><td>4.</td><td>Is the port actually exposed/published correctly?</td></tr>
+      <tr><td>5.</td><td>Firewall or security group blocking the port (cloud VM case)?</td></tr>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>For your stack:</strong> when your FastAPI backend, MLflow tracking server,
+    and Postgres are all containerized, put them on one custom bridge network (or a single
+    docker-compose file) so they resolve each other by service name. This avoids hardcoding
+    IPs and matches how you'd structure things for the k3d deployment later — Kubernetes
+    Services provide the same "resolve by name" pattern via cluster DNS.
+  </div>
+
+</body>
+</html>
