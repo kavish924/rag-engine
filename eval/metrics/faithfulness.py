@@ -67,14 +67,12 @@ Example:
 def _parse_boolean_array(raw: str, expected_len: int) -> list[bool]:
     match = re.search(r"\[[^\]]*\]", raw, re.IGNORECASE)
     if not match:
+        print(f"WARNING: faithfulness judge returned unparseable response: {raw!r}")
         return [False] * expected_len
 
     try:
         verdicts = json.loads(match.group().lower())
     except json.JSONDecodeError:
+        print(f"WARNING: faithfulness judge returned malformed JSON: {raw!r}")
         return [False] * expected_len
-
-    if len(verdicts) != expected_len:
-        verdicts = (verdicts + [False] * expected_len)[:expected_len]
-
-    return [bool(v) for v in verdicts]
+    ...

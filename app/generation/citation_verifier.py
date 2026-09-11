@@ -5,7 +5,6 @@ from difflib import SequenceMatcher
 CITATION_MATCH_THRESHOLD = 0.90
 _DEBUG = os.getenv("CITATION_DEBUG", "false").lower() == "true"
 
-
 def verify_citations(raw_citations: list[dict], chunks: list[dict]) -> list[dict]:
     if not raw_citations or not chunks:
         return []

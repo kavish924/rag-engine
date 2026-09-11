@@ -1,228 +1,161 @@
-# RAG Engine — Hybrid Retrieval, Citation-Verified Q&A
+# rag-engine
 
-A production-oriented Retrieval-Augmented Generation system built from the
-ground up: hybrid (dense + sparse) retrieval with RRF fusion, configurable
-chunking strategies, a citation-verified generation layer, a composite
-confidence scorer, and a full LLM-as-judge evaluation harness — all served
-behind a FastAPI backend with a Streamlit dashboard, containerized with
-Docker Compose.
+A Retrieval-Augmented Generation system built to demonstrate hybrid retrieval, multi-strategy chunking, and a rigorous evaluation harness over a document corpus. Built as a portfolio project — the goal is to show production-RAG tradeoffs (retrieval fusion, citation grounding, eval methodology), not to be a finished product.
 
-This isn't a LangChain quickstart. It's an attempt to build the parts most
-RAG tutorials skip: verifying that citations actually support the claims
-they're attached to, knowing when to say "I don't know," and having an
-evaluation suite that can tell you why a change helped or hurt.
+## Status
 
-## Why this exists
+This project is under active development. The eval numbers below are **preliminary** — see  before treating any score as representative of system quality.
 
-Most RAG demos stop at "it retrieves chunks and the LLM answers." The
-interesting engineering problems start after that:
+## Architecture
 
-- Retrieval that only works for prose is a liability for technical docs
-  full of exact-match tokens (function names, config keys, error codes) —
-  hence dense and sparse retrieval, fused with RRF.
-- An LLM will confidently cite a chunk that doesn't actually support its
-  claim. So citations are verified post-hoc, not trusted.
-- "Which chunking strategy is best?" is an empirical question, not a
-  guess — so chunking strategy is a swappable, evaluable parameter, and
-  there's a script that compares all three head-to-head.
-- You can't improve what you don't measure — so every generation is
-  scored on correctness, faithfulness, retrieval relevance, and citation
-  accuracy against a hand-written golden dataset.
+Three services, orchestrated with Docker Compose:
 
-## Features
+| Service | Role | Depends on |
+|---|---|---|
+| `chromadb` | Vector store (dense embeddings + persisted chunks) | — |
+| `api` | FastAPI backend — retrieval, generation, citation verification | `chromadb` |
+| `seed` | One-shot ingestion job — parses corpus, chunks, embeds, writes to Chroma | `chromadb` |
+| `frontend` | Streamlit UI, calls `api` over HTTP | `api` |
 
-- **Hybrid retrieval** - dense (ChromaDB + `text-embedding-3-small`) and
-  sparse (BM25) search, combined with Reciprocal Rank Fusion, followed by
-  an LLM-as-judge reranking pass.
--  **Configurable chunking** - fixed-size, structure-aware (recursive/
-  header-based), and semantic (topic-boundary) strategies, selectable
-  per ingestion run and directly comparable via the eval harness.
-- **Grounded generation** — prompt templates that constrain the model to
-  the retrieved context, with inline citations parsed from the response.
-- **Citation verification** — every citation-claim pair is checked
-  against the actual source chunk before it's surfaced to the user or
-  counted toward confidence.
-- **Confidence scoring** — a composite score gates low-confidence answers
-  behind a structured "I don't know" fallback instead of a hallucination.
-- **Evaluation framework** — four LLM-as-judge metrics (correctness,
-  faithfulness, retrieval relevance, citation accuracy) run against a
-  50+ question golden dataset, plus a dedicated chunking-strategy
-  comparison script.
-- **API + dashboard** — a FastAPI service (`/v1/ask`, `/v1/documents`,
-  `/v1/ingest`) and a Streamlit dashboard for asking questions and
-  inspecting citations, confidence, and hybrid-vs-dense-only retrieval
-  side by side.
+### Retrieval
 
-## Tech stack
+Hybrid dense + sparse (BM25) retrieval, fused with Reciprocal Rank Fusion, followed by cross-encoder reranking:
 
-| Layer | Choice |
-|---|---|
-| API | FastAPI, Pydantic v2 |
-| Vector store | ChromaDB |
-| Sparse retrieval | BM25 (`rank-bm25`) |
-| Embeddings | OpenAI `text-embedding-3-small` |
-| Generation | Anthropic Claude (default), OpenAI (swappable) |
-| Dashboard | Streamlit |
-| Infra | Docker Compose |
-| Testing | pytest, pytest-asyncio, httpx |
+- Dense: `sentence-transformers` embeddings (`BAAI/bge-small-en-v1.5`) against ChromaDB
+- Sparse: BM25 (`rank-bm25`)
+- Fusion: weighted RRF (`RRF_DENSE_WEIGHT` / `RRF_SPARSE_WEIGHT`, configurable)
+- Rerank: cross-encoder over the top fused candidates (`RERANK_TOP_N`)
+
+### Chunking
+
+Three strategies, selectable at ingestion time via `--strategy`:
+
+- `fixed_size` — naive fixed-length windows
+- `recursive_structure` — structure-aware splitting (headings, sections)
+- `semantic` — embedding-similarity-based chunk boundaries
+
+### Generation & citation
+
+- Generation: Gemini, via its OpenAI-compatible endpoint (`app/generation/generator.py`)
+- Citations: answers are expected to cite retrieved chunks inline (`[1]`, `[2]`, ...); a verifier checks each citation's excerpt against the source chunk using exact-substring or near-verbatim (`SequenceMatcher`, 0.90 threshold) matching
+
+### Evaluation
+
+A four-metric harness (`eval/run_eval.py`) scores each answer on:
+
+- **Correctness** — judged against a golden answer
+- **Faithfulness** — are generated claims grounded in retrieved context
+- **Retrieval relevance** — did retrieval surface the expected source documents
+- **Citation accuracy** — do cited excerpts actually appear in their cited chunk
+
+Correctness and faithfulness are scored by an LLM judge (`eval/llm_judge_client.py`), currently Ollama-only (`llama3.2:latest`, local, CPU). The harness checkpoints per-case results and supports partial reruns.
+
+## Setup
+
+### Prerequisites
+
+- Docker + Docker Compose
+- A Gemini API key ([Google AI Studio](https://aistudio.google.com/))
+- Ollama running locally with `llama3.2` pulled, if you intend to run evaluation
+
+### Configuration
+
+Copy `.env.example` to `.env` and fill in:
+
+```
+LLM_PROVIDER=gemini
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL=BAAI/bge-small-en-v1.5
+GEMINI_API_KEY=<your key>
+GEMINI_MODEL=gemini-3.5-flash-lite
+
+OLLAMA_BASE_URL=http://localhost:11434/v1
+OLLAMA_JUDGE_MODEL=llama3.2:latest
+
+CHROMA_HOST=chromadb
+CHROMA_PORT=8000
+CHROMA_COLLECTION=rag_chunks
+
+DENSE_TOP_K=10
+SPARSE_TOP_K=10
+RRF_DENSE_WEIGHT=0.7
+RRF_SPARSE_WEIGHT=0.3
+RERANK_TOP_N=5
+CONFIDENCE_THRESHOLD=0.45
+
+API_HOST=0.0.0.0
+API_PORT=8000
+```
+
+**Never commit `.env`.** It's already in `.gitignore` — keep it that way, and rotate any key that's ever been pasted somewhere it shouldn't (chat logs, screenshots, issue trackers).
+
+### Run
+
+```bash
+docker compose build
+docker compose up chromadb api frontend
+```
+
+Seed the corpus (one-shot, run separately):
+
+```bash
+docker compose run --rm seed
+```
+
+Drop sample documents (`.pdf`, `.md`, `.txt`, `.html`) into `scripts/sample_corpus/` before seeding.
+
+- API: `http://localhost:8000` (`/health` for a liveness check)
+- Frontend: `http://localhost:8501`
+
+### Run evaluation
+
+Evaluation runs locally (not inside Docker) against the `chromadb` and `api` containers:
+
+```bash
+python -m eval.run_eval --delay 1.5
+```
+
+Useful flags:
+
+- `--limit N` — run only the first N cases, for fast iteration
+- `--delay` — seconds between cases (be considerate of Gemini rate limits)
+
+Set `EVAL_VERBOSE=true` or `CITATION_DEBUG=true` for per-case retrieval/citation debug output; both default to off.
 
 ## Project structure
 
 ```
 rag-engine/
+├── docker-compose.yml
+├── Dockerfile.api
+├── Dockerfile.seed
+├── Dockerfile.frontend
+├── requirements/
+│   ├── backend.txt
+│   ├── frontend.txt
+│   └── seed.txt
+├── requirements-dev.txt
 ├── app/
-│   ├── main.py                       # FastAPI entrypoint
-│   ├── config.py                     # Settings (env vars, model names, retrieval weights)
-│   ├── api/
-│   │   ├── schemas.py                 # Pydantic request/response models
-│   │   └── routes/
-│   │       ├── ask.py                   # POST /v1/ask
-│   │       ├── documents.py             # GET  /v1/documents
-│   │       └── ingest.py                # POST /v1/ingest
-│   ├── ingestion/                    # Phase 1 — load, chunk, embed, dedup
-│   │   ├── loaders.py                    # multi-format loader (md/txt/html/pdf)
-│   │   ├── chunkers/
-│   │   │   ├── fixed_size.py                # baseline: fixed-size + overlap
-│   │   │   ├── recursive_structure.py       # structure-aware: split by headers
-│   │   │   └── semantic.py                  # semantic: split on topic boundaries
-│   │   ├── embeddings.py                 # text-embedding-3-small wrapper
-│   │   ├── dedup.py                      # near-duplicate detection (cosine > 0.95)
-│   │   └── pipeline.py                   # orchestrates the full ingestion flow
-│   ├── retrieval/                    # Phase 2 — hybrid retrieval engine
-│   │   ├── dense.py                      # vector search (ChromaDB)
-│   │   ├── sparse_bm25.py                # BM25 keyword search
-│   │   ├── fusion.py                     # Reciprocal Rank Fusion (RRF)
-│   │   ├── reranker.py                   # LLM-as-judge rerank
-│   │   └── retriever.py                  # orchestrates dense+sparse+fusion+rerank
-│   ├── generation/                   # Phase 3 — grounded generation + trust layer
-│   │   ├── prompts.py                    # grounded system prompt templates
-│   │   ├── generator.py                  # calls the LLM, parses citations
-│   │   ├── citation_verifier.py          # verifies each citation-claim pair
-│   │   └── confidence_scorer.py          # composite confidence score
-│   └── storage/                      # Vector store + BM25 index wrappers
-│       ├── vector_store.py
-│       └── bm25_store.py
-├── eval/                             # Phase 4 — evaluation framework
-│   ├── golden_dataset.jsonl           # 50+ hand-written Q&A pairs
-│   ├── metrics/
-│   │   ├── correctness.py                # LLM-as-judge vs. golden answer
-│   │   ├── faithfulness.py               # are claims grounded in context?
-│   │   ├── retrieval_relevance.py        # were the right chunks retrieved?
-│   │   └── citation_accuracy.py          # do citations support claims?
-│   ├── run_eval.py                    # runs full suite, produces report
-│   └── chunking_comparison.py         # compares the 3 chunking strategies
+│   ├── config.py
+│   ├── main.py
+│   ├── api/routes/
+│   ├── ingestion/pipeline.py
+│   ├── retrieval/retriever.py
+│   └── generation/
+│       ├── generator.py
+│       └── citation_verifier.py
 ├── frontend/
-│   └── streamlit_app.py               # ask questions, inspect citations/confidence,
-│                                        # toggle hybrid vs. dense-only retrieval
+│   └── streamlit_app.py
 ├── scripts/
-│   ├── seed_corpus.py                 # indexes sample_corpus/ for reviewers
-│   └── sample_corpus/                 # sample documentation set
-├── tests/                            # unit tests per module
-├── docs/
-│   ├── architecture.md                # data flow + key design decisions
-│   └── case_study.md                  # eval results write-up
-├── docker-compose.yml                 # API + ChromaDB + frontend
-├── Dockerfile
-├── requirements.txt
-└── .env.example
-```
-
-## Architecture
-
-```
-Docs (md/txt/html/pdf)
-  -> loaders.py (normalize + metadata)
-  -> chunkers/{fixed_size,recursive_structure,semantic}.py
-  -> embeddings.py (text-embedding-3-small)
-  -> dedup.py (cosine > 0.95 -> skip)
-  -> storage: vector_store.py (ChromaDB) + bm25_store.py, kept in sync
-
-Query
-  -> retrieval/dense.py               (top-k cosine)
-  -> retrieval/sparse_bm25.py         (top-k BM25)
-  -> retrieval/fusion.py              (RRF, weighted)
-  -> retrieval/reranker.py            (top-20 -> top-5)
-  -> generation/generator.py          (grounded answer + raw citations)
-  -> generation/citation_verifier.py  (per-claim verification)
-  -> generation/confidence_scorer.py  (composite score)
-  -> if confidence < threshold: structured fallback ("I don't know")
-  -> API response (app/api/routes/ask.py)
-```
-
-Two indexes (ChromaDB + BM25) are written to together at ingestion time and
-kept in sync, so retrieval can draw on both without a separate sync step.
-Chunking strategy is stored as chunk-level metadata rather than a global
-setting, which is what lets `eval/chunking_comparison.py` run the identical
-eval suite across all three strategies without re-architecting anything.
-Citations are treated as a hypothesis the generator makes, not a fact —
-`citation_verifier.py` checks each one against the actual chunk content
-before it's shown to the user or counted in the confidence score.
-
-See [`docs/architecture.md`](docs/architecture.md) for more detail.
-
-## Quickstart
-
-```bash
-cp .env.example .env          # add your OPENAI_API_KEY / ANTHROPIC_API_KEY
-docker-compose up --build     # spins up API + ChromaDB + dashboard
-python scripts/seed_corpus.py # indexes the sample corpus
-```
-
-- API docs: http://localhost:8000/docs
-- Dashboard: http://localhost:8501
-
-### Running without Docker
-
-```bash
-pip install -r requirements.txt
-python -m app.main               # start the API
-python -m scripts.seed_corpus    # index the sample corpus
-streamlit run frontend/streamlit_app.py
-```
-
-> This project uses `python -m module.name` invocation throughout so that
-> imports from the `app` package resolve correctly regardless of OS or
-> working directory.
-
-## Configuration
-
-Key settings (see `app/config.py` / `.env.example`):
-
-| Setting | Default | Purpose |
-|---|---|---|
-| `llm_provider` | `anthropic` | `anthropic` or `openai` |
-| `generation_model` | `claude-sonnet-4-6` | Generator model |
-| `embedding_model` | `text-embedding-3-small` | Embedding model |
-| `dense_top_k` / `sparse_top_k` | `10` / `10` | Candidates pulled from each index pre-fusion |
-| `rrf_dense_weight` / `rrf_sparse_weight` | `0.7` / `0.3` | RRF fusion weights |
-| `rerank_top_n` | `5` | Chunks kept after reranking |
-| `confidence_threshold` | `0.45` | Below this, the API returns a structured "I don't know" |
-
-## Running evals
-
-```bash
-python -m eval.run_eval               
-python -m eval.chunking_comparison    
-```
-
-Results are scored against `eval/golden_dataset.jsonl` (50+ hand-written
-Q&A pairs) using an LLM-as-judge for each metric. See
-[`docs/case_study.md`](docs/case_study.md) for a write-up of results once
-the suite has been run end-to-end.
-
-## Build order
-
-| Phase | Focus | Folder(s) |
-|---|---|---|
-| 1. Ingestion & Chunking | Load, chunk, embed, dedup | `app/ingestion/` |
-| 2. Hybrid Retrieval | Dense + sparse + RRF + rerank | `app/retrieval/` |
-| 3. Generation & Citations | Grounded generation, verified citations, confidence | `app/generation/` |
-| 4. Evaluation Framework | LLM-as-judge metrics, golden dataset | `eval/` |
-| 5. API & Dashboard | FastAPI routes, Streamlit UI | `app/api/`, `frontend/`, `docker-compose.yml` |
-| 6. Portfolio Polish | Docs, architecture write-up, case study | `docs/` |
-
-## Testing
-
-```bash
-python -m pytest tests/
-```
+│   ├── seed_corpus.py
+│   └── sample_corpus/
+└── eval/
+    ├── run_eval.py
+    ├── llm_judge_client.py
+    ├── golden_dataset.jsonl
+    ├── metrics/
+    │   ├── correctness.py
+    │   ├── faithfulness.py
+    │   ├── retrieval_relevance.py
+    │   └── citation_accuracy.py
+    └── results/

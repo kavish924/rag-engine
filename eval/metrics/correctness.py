@@ -107,9 +107,9 @@ no
     ).strip().lower()
     return 1.0 if response.startswith("yes") else 0.0
 
-
 def _parse_single_score(raw_response: str) -> float:
     match = re.search(r"\d+(\.\d+)?", raw_response)
     if not match:
+        print(f"WARNING: correctness judge returned unparseable response: {raw_response!r}")
         return 0.0
     return float(match.group())

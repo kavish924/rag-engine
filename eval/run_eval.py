@@ -2,7 +2,7 @@ import argparse
 import json
 import time
 from pathlib import Path
-
+import os
 from app.generation.citation_verifier import verify_citations
 from app.generation.generator import generate_answer
 from app.retrieval.retriever import retrieve
@@ -11,8 +11,6 @@ from eval.metrics.correctness import score_correctness
 from eval.metrics.faithfulness import score_faithfulness
 from eval.metrics.retrieval_relevance import score_retrieval_relevance
 
-# Catch whatever rate-limit exception your provider SDK raises.
-# Anthropic: anthropic.RateLimitError. OpenAI: openai.RateLimitError.
 try:
     from anthropic import RateLimitError as AnthropicRateLimitError
 except ImportError:
@@ -26,6 +24,7 @@ RATE_LIMIT_ERRORS = tuple(
     e for e in (AnthropicRateLimitError, OpenAIRateLimitError) if e != ()
 )
 
+_VERBOSE = os.getenv("EVAL_VERBOSE", "false").lower() == "true"
 
 def load_golden_dataset(path="eval/golden_dataset.jsonl"):
     with open(path, "r", encoding="utf-8") as f:
@@ -75,7 +74,7 @@ def run_single_case(case: dict) -> dict:
 
     retrieval_score = score_retrieval_relevance(chunks, expected_source_docs)
 
-    if retrieval_score < 1.0:
+    if retrieval_score < 1.0 and _VERBOSE:
         print(f"[{case['id']}] Retrieval Debug")
         print("Question :", question)
         print("Expected :", expected_source_docs)
