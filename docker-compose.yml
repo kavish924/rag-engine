@@ -1,8 +1,6 @@
-version: "3.9"
-
 services:
   chromadb:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:0.5.15
     ports:
       - "8001:8000"
     volumes:
@@ -16,81 +14,57 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
-
+      dockerfile: Dockerfile.api
     env_file:
       - .env
-
     environment:
       CHROMA_HOST: chromadb
       CHROMA_PORT: 8000
-
     ports:
       - "8000:8000"
-
     depends_on:
       chromadb:
         condition: service_healthy
-
     volumes:
       - ./scripts/sample_corpus:/app/scripts/sample_corpus:ro
       - bm25_data:/app/chroma_data
-
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
-
     restart: unless-stopped
 
   seed:
     build:
       context: .
-      dockerfile: Dockerfile
-
+      dockerfile: Dockerfile.seed
     env_file:
       - .env
-
     environment:
       CHROMA_HOST: chromadb
       CHROMA_PORT: 8000
-
-    command: python -m scripts.seed_corpus
-
     depends_on:
-      api:
+      chromadb:
         condition: service_healthy
-
+      # switch back to depending on `api` if seed_corpus.py hits the /v1/ingest HTTP endpoint
     volumes:
       - ./scripts/sample_corpus:/app/scripts/sample_corpus:ro
-      - bm25_data:/app/chroma_data
-
     restart: "no"
 
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
-
-    command: >
-      streamlit run frontend/streamlit_app.py
-      --server.port=8501
-      --server.address=0.0.0.0
-
+      dockerfile: Dockerfile.frontend
     env_file:
       - .env
-
     environment:
       API_BASE_URL: http://api:8000
-
     ports:
       - "8501:8501"
-
     depends_on:
       api:
         condition: service_healthy
-
     restart: unless-stopped
 
 volumes:

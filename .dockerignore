@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+chroma_data/
+eval/results/
+*.egg-info/
+.pytest_cache/
+node_modules/
+.env
+docs/*.pdf
